@@ -6,6 +6,20 @@ export interface FuelPrices {
   gas?: number;
 }
 
+export interface FuelDeltas {
+  a95Premium?: number;
+  a95?: number;
+  a92?: number;
+  diesel?: number;
+  gas?: number;
+}
+
+export interface FuelHistoryPoint {
+  date: string;
+  formattedDate: string;
+  prices: FuelPrices;
+}
+
 export interface FuelApiResponse {
   requestedDate: string;
   effectiveDate: string;
@@ -13,6 +27,8 @@ export interface FuelApiResponse {
   currency: string;
   unit: string;
   prices: FuelPrices;
+  deltas?: FuelDeltas;
+  history?: FuelHistoryPoint[];
   source: string;
 }
 

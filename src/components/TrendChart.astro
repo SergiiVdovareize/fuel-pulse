@@ -1,0 +1,277 @@
+---
+import type { FuelHistoryPoint } from '../types/fuel';
+
+interface Props {
+  history: FuelHistoryPoint[];
+}
+
+const { history = [] } = Astro.props;
+
+// Готуємо дані для 7 та 30 днів
+const history30 = history.slice(-30);
+const history7 = history.slice(-7);
+
+// Функція обчислення SVG path для лінійного графіка
+function generateSvgPath(points: FuelHistoryPoint[], key: 'a95' | 'diesel' | 'gas', width = 600, height = 180): { path: string; min: number; max: number } {
+  if (points.length < 2) return { path: '', min: 0, max: 0 };
+
+  const values = points.map(p => p.prices[key] ?? 0).filter(v => v > 0);
+  if (values.length === 0) return { path: '', min: 0, max: 0 };
+
+  const min = Math.floor(Math.min(...values) - 0.5);
+  const max = Math.ceil(Math.max(...values) + 0.5);
+  const range = max - min || 1;
+
+  const paddingX = 20;
+  const paddingY = 20;
+  const usableW = width - paddingX * 2;
+  const usableH = height - paddingY * 2;
+
+  const path = points.map((p, idx) => {
+    const val = p.prices[key] ?? min;
+    const x = paddingX + (idx / (points.length - 1)) * usableW;
+    const y = height - paddingY - ((val - min) / range) * usableH;
+    return `${idx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+  }).join(' ');
+
+  return { path, min, max };
+}
+
+const pathA95_30 = generateSvgPath(history30, 'a95');
+const pathDiesel_30 = generateSvgPath(history30, 'diesel');
+const pathGas_30 = generateSvgPath(history30, 'gas');
+
+const pathA95_7 = generateSvgPath(history7, 'a95');
+const pathDiesel_7 = generateSvgPath(history7, 'diesel');
+const pathGas_7 = generateSvgPath(history7, 'gas');
+---
+
+<section class="trend-chart-card glass-card">
+  <div class="chart-header">
+    <div class="header-left">
+      <h2 class="chart-title">📊 Динаміка цін на пальне</h2>
+      <p class="chart-subtitle">Зміна середньої вартості на А-95, ДП та Автогаз</p>
+    </div>
+    <div class="chart-toggles" role="tablist">
+      <button class="toggle-btn active" id="btn-7d" role="tab" aria-selected="true">7 днів</button>
+      <button class="toggle-btn" id="btn-30d" role="tab" aria-selected="false">30 днів</button>
+    </div>
+  </div>
+
+  <div class="chart-legend">
+    <div class="legend-item">
+      <span class="legend-color legend-a95"></span>
+      <span>Бензин А-95</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-color legend-diesel"></span>
+      <span>Дизель (ДП)</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-color legend-gas"></span>
+      <span>Автогаз</span>
+    </div>
+  </div>
+
+  <!-- SVG Container -->
+  <div class="svg-container">
+    <!-- 7-Day Chart -->
+    <svg viewBox="0 0 600 180" class="chart-svg" id="svg-7d">
+      <defs>
+        <linearGradient id="gradA95" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Background Grid lines -->
+      <line x1="20" y1="30" x2="580" y2="30" class="grid-line" />
+      <line x1="20" y1="90" x2="580" y2="90" class="grid-line" />
+      <line x1="20" y1="150" x2="580" y2="150" class="grid-line" />
+
+      <!-- Lines -->
+      <path d={pathA95_7.path} class="line-path line-a95" />
+      <path d={pathDiesel_7.path} class="line-path line-diesel" />
+      <path d={pathGas_7.path} class="line-path line-gas" />
+    </svg>
+
+    <!-- 30-Day Chart (Hidden initially) -->
+    <svg viewBox="0 0 600 180" class="chart-svg hidden" id="svg-30d">
+      <!-- Background Grid lines -->
+      <line x1="20" y1="30" x2="580" y2="30" class="grid-line" />
+      <line x1="20" y1="90" x2="580" y2="90" class="grid-line" />
+      <line x1="20" y1="150" x2="580" y2="150" class="grid-line" />
+
+      <!-- Lines -->
+      <path d={pathA95_30.path} class="line-path line-a95" />
+      <path d={pathDiesel_30.path} class="line-path line-diesel" />
+      <path d={pathGas_30.path} class="line-path line-gas" />
+    </svg>
+  </div>
+
+  <div class="dates-axis" id="axis-7d">
+    {history7.map(p => <span>{p.formattedDate}</span>)}
+  </div>
+  <div class="dates-axis hidden" id="axis-30d">
+    {history30.filter((_, i) => i % 5 === 0 || i === history30.length - 1).map(p => <span>{p.formattedDate}</span>)}
+  </div>
+</section>
+
+<script>
+  const btn7d = document.getElementById('btn-7d');
+  const btn30d = document.getElementById('btn-30d');
+  const svg7d = document.getElementById('svg-7d');
+  const svg30d = document.getElementById('svg-30d');
+  const axis7d = document.getElementById('axis-7d');
+  const axis30d = document.getElementById('axis-30d');
+
+  if (btn7d && btn30d && svg7d && svg30d && axis7d && axis30d) {
+    btn7d.addEventListener('click', () => {
+      btn7d.classList.add('active');
+      btn7d.setAttribute('aria-selected', 'true');
+      btn30d.classList.remove('active');
+      btn30d.setAttribute('aria-selected', 'false');
+
+      svg7d.classList.remove('hidden');
+      axis7d.classList.remove('hidden');
+      svg30d.classList.add('hidden');
+      axis30d.classList.add('hidden');
+    });
+
+    btn30d.addEventListener('click', () => {
+      btn30d.classList.add('active');
+      btn30d.setAttribute('aria-selected', 'true');
+      btn7d.classList.remove('active');
+      btn7d.setAttribute('aria-selected', 'false');
+
+      svg30d.classList.remove('hidden');
+      axis30d.classList.remove('hidden');
+      svg7d.classList.add('hidden');
+      axis7d.classList.add('hidden');
+    });
+  }
+</script>
+
+<style>
+  .trend-chart-card {
+    padding: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .chart-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .chart-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+  }
+
+  .chart-toggles {
+    display: flex;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.25rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .toggle-btn {
+    min-height: 44px;
+    padding: 0.4rem 1rem;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .toggle-btn.active {
+    background: var(--accent-emerald);
+    color: #ffffff;
+  }
+
+  .chart-legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .legend-color {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .legend-a95 { background: #10b981; }
+  .legend-diesel { background: #06b6d4; }
+  .legend-gas { background: #a855f7; }
+
+  .svg-container {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .chart-svg {
+    width: 100%;
+    height: auto;
+    max-height: 200px;
+  }
+
+  .chart-svg.hidden {
+    display: none;
+  }
+
+  .grid-line {
+    stroke: rgba(255, 255, 255, 0.07);
+    stroke-dasharray: 4 4;
+    stroke-width: 1;
+  }
+
+  .line-path {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke-dashoffset 0.5s ease;
+  }
+
+  .line-a95 { stroke: #10b981; }
+  .line-diesel { stroke: #06b6d4; }
+  .line-gas { stroke: #a855f7; }
+
+  .dates-axis {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .dates-axis.hidden {
+    display: none;
+  }
+</style>

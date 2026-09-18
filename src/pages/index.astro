@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import FuelCards from '../components/FuelCards.astro';
+import TrendChart from '../components/TrendChart.astro';
 import DatePicker from '../components/DatePicker.astro';
 import TankCalculator from '../components/TankCalculator.astro';
 import TripCalculator from '../components/TripCalculator.astro';
@@ -53,8 +54,11 @@ const pageDescription = `Актуальні середні ціни на пал�
     <!-- Interactive Date Picker -->
     <DatePicker currentDate={data.effectiveDate} />
 
-    <!-- Main Fuel Price Cards -->
-    <FuelCards prices={data.prices} unit={data.unit} />
+    <!-- Main Fuel Price Cards with Deltas -->
+    <FuelCards prices={data.prices} deltas={data.deltas} unit={data.unit} />
+
+    <!-- 7/30-Day Trend Chart -->
+    {data.history && <TrendChart history={data.history} />}
 
     <!-- Share Bar -->
     <ShareBar 
