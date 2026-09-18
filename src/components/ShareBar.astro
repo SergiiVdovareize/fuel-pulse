@@ -1,0 +1,140 @@
+---
+import type { FuelPrices } from '../types/fuel';
+import { formatDateUkrainian } from '../services/fuelApi';
+
+interface Props {
+  dateStr: string;
+  effectiveDateStr: string;
+  prices: FuelPrices;
+}
+
+const { dateStr, effectiveDateStr, prices } = Astro.props;
+
+const dateFormatted = formatDateUkrainian(effectiveDateStr);
+
+const shareText = `⛽️ Середні ціни на пальне в Україні (${dateFormatted}):\n` +
+  (prices.a95Premium ? `• А-95+: ${prices.a95Premium.toFixed(2)} грн/л\n` : '') +
+  (prices.a95 ? `• А-95: ${prices.a95.toFixed(2)} грн/л\n` : '') +
+  (prices.diesel ? `• Дизель: ${prices.diesel.toFixed(2)} грн/л\n` : '') +
+  (prices.gas ? `• Газ: ${prices.gas.toFixed(2)} грн/л\n` : '') +
+  (prices.a92 ? `• А-92: ${prices.a92.toFixed(2)} грн/л\n` : '') +
+  `\nДжерело: FuelPulse`;
+---
+
+<div class="share-bar glass-card">
+  <div class="share-info">
+    <span class="share-icon">📲</span>
+    <span class="share-text">Поділитися зведенням цін у месенджерах:</span>
+  </div>
+
+  <div class="share-actions">
+    <button 
+      type="button" 
+      class="action-btn copy-btn" 
+      id="copy-prices-btn"
+      data-text={shareText}
+    >
+      <span class="btn-icon">📋</span>
+      <span class="btn-label" id="copy-label">Скопіювати зведення</span>
+    </button>
+
+    <a 
+      href={`https://t.me/share/url?url=${encodeURIComponent(Astro.url.href)}&text=${encodeURIComponent(shareText)}`}
+      target="_blank" 
+      rel="noopener noreferrer" 
+      class="action-btn telegram-btn"
+    >
+      <span class="btn-icon">✈️</span>
+      <span class="btn-label">Telegram</span>
+    </a>
+  </div>
+</div>
+
+<script>
+  const copyBtn = document.getElementById('copy-prices-btn');
+  const copyLabel = document.getElementById('copy-label');
+
+  if (copyBtn && copyLabel) {
+    copyBtn.addEventListener('click', async () => {
+      const text = copyBtn.getAttribute('data-text') || '';
+      try {
+        await navigator.clipboard.writeText(text);
+        const originalText = copyLabel.textContent;
+        copyLabel.textContent = 'Скопійовано! ✓';
+        copyBtn.classList.add('copied');
+        setTimeout(() => {
+          copyLabel.textContent = originalText;
+          copyBtn.classList.remove('copied');
+        }, 2500);
+      } catch (err) {
+        console.error('Failed to copy', err);
+      }
+    });
+  }
+</script>
+
+<style>
+  .share-bar {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .share-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+  }
+
+  .share-icon {
+    font-size: 1.2rem;
+  }
+
+  .share-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .copy-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+  }
+
+  .copy-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .copy-btn.copied {
+    border-color: var(--accent-emerald);
+    color: var(--accent-emerald);
+  }
+
+  .telegram-btn {
+    background: rgba(36, 161, 222, 0.15);
+    border: 1px solid rgba(36, 161, 222, 0.3);
+    color: #24a1de;
+  }
+
+  .telegram-btn:hover {
+    background: rgba(36, 161, 222, 0.25);
+  }
+</style>

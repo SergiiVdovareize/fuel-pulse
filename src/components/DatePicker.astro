@@ -1,0 +1,229 @@
+---
+import { formatDateISO } from '../services/fuelApi';
+
+interface Props {
+  currentDate: string;
+}
+
+const { currentDate } = Astro.props;
+
+// Розрахунок швидких дат
+const now = new Date();
+const todayISO = formatDateISO(now);
+
+const yesterday = new Date(now);
+yesterday.setDate(now.getDate() - 1);
+const yesterdayISO = formatDateISO(yesterday);
+
+const weekAgo = new Date(now);
+weekAgo.setDate(now.getDate() - 7);
+const weekAgoISO = formatDateISO(weekAgo);
+
+const monthAgo = new Date(now);
+monthAgo.setDate(now.getDate() - 30);
+const monthAgoISO = formatDateISO(monthAgo);
+
+const yearAgo = new Date(now);
+yearAgo.setFullYear(now.getFullYear() - 1);
+const yearAgoISO = formatDateISO(yearAgo);
+
+const presets = [
+  { label: 'Сьогодні', date: todayISO },
+  { label: 'Вчора', date: yesterdayISO },
+  { label: '7 днів тому', date: weekAgoISO },
+  { label: '30 днів тому', date: monthAgoISO },
+  { label: 'Рік тому', date: yearAgoISO },
+];
+---
+
+<div class="date-picker-card glass-card">
+  <div class="date-picker-header">
+    <div class="picker-title-group">
+      <span class="picker-icon">📅</span>
+      <div>
+        <h3 class="picker-title">Вибір дати моніторингу</h3>
+        <p class="picker-subtitle">Оберіть дату в календарі або скористайтеся швидкими кнопками</p>
+      </div>
+    </div>
+
+    <form class="custom-date-form" id="date-form">
+      <label for="date-input" class="sr-only">Оберіть дату</label>
+      <input 
+        type="date" 
+        id="date-input" 
+        name="date" 
+        value={currentDate} 
+        max={todayISO} 
+        min="2015-01-01"
+        class="date-input"
+      />
+      <button type="submit" class="submit-btn">Перейти</button>
+    </form>
+  </div>
+
+  <div class="presets-row">
+    <span class="presets-label">Швидкий перехід:</span>
+    <div class="presets-list">
+      {
+        presets.map((preset) => {
+          const isActive = preset.date === currentDate;
+          const href = preset.date === todayISO ? '/' : `/${preset.date}`;
+          return (
+            <a 
+              href={href} 
+              class={`preset-btn ${isActive ? 'active' : ''}`}
+            >
+              {preset.label}
+            </a>
+          );
+        })
+      }
+    </div>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById('date-form') as HTMLFormElement | null;
+  const input = document.getElementById('date-input') as HTMLInputElement | null;
+
+  if (form && input) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = input.value;
+      if (val) {
+        window.location.href = `/${val}`;
+      }
+    });
+
+    input.addEventListener('change', () => {
+      if (input.value) {
+        window.location.href = `/${input.value}`;
+      }
+    });
+  }
+</script>
+
+<style>
+  .date-picker-card {
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .date-picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .picker-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .picker-icon {
+    font-size: 1.6rem;
+  }
+
+  .picker-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .picker-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .custom-date-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+
+  .date-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    padding: 0.6rem 0.9rem;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .date-input:focus {
+    border-color: var(--accent-emerald);
+  }
+
+  .submit-btn {
+    background: var(--accent-emerald);
+    color: #0b0f19;
+    font-weight: 700;
+    padding: 0.6rem 1.1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    transition: opacity 0.2s;
+  }
+
+  .submit-btn:hover {
+    opacity: 0.9;
+  }
+
+  .presets-row {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .presets-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .presets-list {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .preset-btn {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+
+  .preset-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+  }
+
+  .preset-btn.active {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: var(--accent-emerald);
+    color: var(--accent-emerald);
+    font-weight: 600;
+  }
+</style>

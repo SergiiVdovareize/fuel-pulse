@@ -1,0 +1,21 @@
+{
+  "name": "fuel-ua",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^12.2.0",
+    "@astrojs/sitemap": "^3.2.1",
+    "astro": "^5.4.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  }
+}

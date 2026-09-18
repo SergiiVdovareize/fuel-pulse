@@ -1,0 +1,258 @@
+---
+import type { FuelPrices } from '../types/fuel';
+import { FUEL_METAS } from '../types/fuel';
+
+interface Props {
+  prices: FuelPrices;
+  unit: string;
+}
+
+const { prices, unit } = Astro.props;
+---
+
+<div class="calculator-card glass-card">
+  <div class="calc-header">
+    <div class="calc-icon">🔋</div>
+    <div>
+      <h3 class="calc-title">Калькулятор повного бака</h3>
+      <p class="calc-subtitle">Скільки коштуватиме заправити бак на обрану дату</p>
+    </div>
+  </div>
+
+  <div class="calc-controls">
+    <div class="slider-group">
+      <div class="slider-header">
+        <label for="tank-slider">Об'єм бака:</label>
+        <span class="liters-display"><strong id="liters-value">50</strong> л</span>
+      </div>
+      <input 
+        type="range" 
+        id="tank-slider" 
+        min="10" 
+        max="100" 
+        value="50" 
+        step="1"
+        class="slider"
+      />
+    </div>
+
+    <div class="presets-buttons">
+      <button type="button" class="tank-preset" data-liters="35">35 л (Хетчбек)</button>
+      <button type="button" class="tank-preset" data-liters="50">50 л (Седан)</button>
+      <button type="button" class="tank-preset" data-liters="65">65 л (Кросовер)</button>
+      <button type="button" class="tank-preset" data-liters="80">80 л (Позашляховик)</button>
+    </div>
+  </div>
+
+  <div class="tank-results-grid">
+    {
+      FUEL_METAS.map((fuel) => {
+        const price = prices[fuel.key];
+        const isAvailable = typeof price === 'number' && price > 0;
+        const initialTotal = isAvailable ? (price * 50).toFixed(0) : '0';
+
+        return (
+          <div class="tank-result-item" data-fuel-key={fuel.key} data-price={price ?? 0}>
+            <div class="result-fuel-info">
+              <span class="dot" style={`background: ${fuel.badgeColor};`}></span>
+              <span class="fuel-name">{fuel.shortName}</span>
+            </div>
+            {isAvailable ? (
+              <div class="result-amount">
+                <span class="sum-value" id={`sum-${fuel.key}`}>{initialTotal}</span>
+                <span class="sum-currency">грн</span>
+              </div>
+            ) : (
+              <span class="no-price">—</span>
+            )}
+          </div>
+        );
+      })
+    }
+  </div>
+</div>
+
+<script>
+  const slider = document.getElementById('tank-slider') as HTMLInputElement | null;
+  const litersDisplay = document.getElementById('liters-value');
+  const presetBtns = document.querySelectorAll('.tank-preset');
+  const resultItems = document.querySelectorAll('.tank-result-item');
+
+  function updateTotals(liters: number) {
+    if (litersDisplay) litersDisplay.textContent = String(liters);
+
+    resultItems.forEach((item) => {
+      const priceAttr = item.getAttribute('data-price');
+      const fuelKey = item.getAttribute('data-fuel-key');
+      const sumElement = document.getElementById(`sum-${fuelKey}`);
+
+      if (priceAttr && sumElement) {
+        const price = parseFloat(priceAttr);
+        if (price > 0) {
+          const total = Math.round(price * liters);
+          sumElement.textContent = total.toLocaleString('uk-UA');
+        }
+      }
+    });
+  }
+
+  if (slider) {
+    slider.addEventListener('input', () => {
+      updateTotals(parseInt(slider.value, 10));
+    });
+  }
+
+  presetBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const liters = parseInt(btn.getAttribute('data-liters') || '50', 10);
+      if (slider) slider.value = String(liters);
+      updateTotals(liters);
+    });
+  });
+</script>
+
+<style>
+  .calculator-card {
+    padding: 1.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .calc-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .calc-icon {
+    font-size: 1.6rem;
+  }
+
+  .calc-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+
+  .calc-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .calc-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+  }
+
+  .liters-display {
+    color: var(--text-primary);
+  }
+
+  .liters-display strong {
+    font-size: 1.4rem;
+    color: var(--accent-emerald);
+  }
+
+  .slider {
+    width: 100%;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
+    accent-color: var(--accent-emerald);
+    cursor: pointer;
+  }
+
+  .presets-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .tank-preset {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.75rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+
+  .tank-preset:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+  }
+
+  .tank-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .tank-result-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-subtle);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .result-fuel-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .fuel-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .result-amount {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+  }
+
+  .sum-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sum-currency {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .no-price {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+</style>

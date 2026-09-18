@@ -1,0 +1,218 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  dateStr: string;
+  effectiveDateStr?: string;
+  canonicalUrl?: string;
+  prices?: {
+    a95Premium?: number;
+    a95?: number;
+    a92?: number;
+    diesel?: number;
+    gas?: number;
+  };
+}
+
+const {
+  title,
+  description,
+  dateStr,
+  effectiveDateStr = dateStr,
+  canonicalUrl = Astro.url.href,
+  prices
+} = Astro.props;
+
+// JSON-LD structured data for Google Rich Snippets
+const schemaData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://fuel-ua.pages.dev/#website",
+      "url": "https://fuel-ua.pages.dev",
+      "name": "Пальне в Україні — Середні ціни",
+      "description": "Щоденний моніторинг середніх цін на пальне в Україні: А-95, Дизель, Газ"
+    },
+    {
+      "@type": "Dataset",
+      "name": `Ціни на пальне в Україні на ${effectiveDateStr}`,
+      "description": description,
+      "variableMeasured": ["Бензин А-95", "Дизельне пальне", "Автогаз"],
+      "temporalCoverage": effectiveDateStr
+    }
+  ]
+};
+---
+
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- SEO Meta Tags -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="uk_UA" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="/" class="brand">
+          <div class="brand-badge">⛽️</div>
+          <div class="brand-text">
+            <span class="brand-title">Fuel<span class="highlight">Pulse</span></span>
+            <span class="brand-sub">Ціни на пальне в Україні</span>
+          </div>
+        </a>
+
+        <div class="header-status">
+          <span class="pulse-dot"></span>
+          <span class="status-label">Дані: Мінфін</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p class="footer-copy">
+          © {new Date().getFullYear()} FuelPulse. Дані засновані на офіційному моніторингу цін 
+          <a href="https://index.minfin.com.ua/ua/markets/fuel/" target="_blank" rel="noopener noreferrer">index.minfin.com.ua</a>.
+        </p>
+        <p class="footer-note">
+          Ціни вказано в гривнях за літр (грн/л) без урахування персональних знижок у мережах АЗС.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--border-subtle);
+    background: rgba(10, 13, 20, 0.85);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .brand-badge {
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+  }
+
+  .brand-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .brand-title .highlight {
+    color: var(--accent-emerald);
+  }
+
+  .brand-sub {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .header-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.75rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--accent-emerald);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent-emerald);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.8; }
+  }
+
+  .main-content {
+    flex: 1;
+    padding: 2.5rem 0 4rem;
+  }
+
+  .site-footer {
+    border-top: 1px solid var(--border-subtle);
+    padding: 2rem 0;
+    background: rgba(10, 13, 20, 0.95);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  .footer-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .footer-copy a {
+    color: var(--accent-emerald);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

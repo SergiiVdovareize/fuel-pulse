@@ -1,0 +1,137 @@
+---
+import type { FuelPrices } from '../types/fuel';
+import { FUEL_METAS } from '../types/fuel';
+
+interface Props {
+  prices: FuelPrices;
+  unit: string;
+}
+
+const { prices, unit } = Astro.props;
+---
+
+<div class="prices-grid">
+  {
+    FUEL_METAS.map((fuel) => {
+      const price = prices[fuel.key];
+      const isAvailable = typeof price === 'number' && price > 0;
+
+      return (
+        <article class="price-card glass-card" style={`--fuel-accent: ${fuel.badgeColor};`}>
+          <div class="card-header">
+            <span class="badge" style={`color: ${fuel.badgeColor}; border-color: ${fuel.badgeColor}33; background: ${fuel.badgeColor}15;`}>
+              {fuel.shortName}
+            </span>
+            <span class="fuel-type-label">{fuel.label}</span>
+          </div>
+
+          <div class="card-body">
+            {isAvailable ? (
+              <div class="price-wrapper">
+                <span class="price-number">{price.toFixed(2)}</span>
+                <span class="price-unit">{unit}</span>
+              </div>
+            ) : (
+              <div class="price-unavailable">
+                <span>Немає даних</span>
+              </div>
+            )}
+            <p class="fuel-desc">{fuel.description}</p>
+          </div>
+        </article>
+      );
+    })
+  }
+</div>
+
+<style>
+  .prices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+    margin: 2rem 0;
+  }
+
+  .price-card {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .price-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--fuel-accent);
+    opacity: 0.8;
+  }
+
+  .card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .badge {
+    align-self: flex-start;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    letter-spacing: 0.05em;
+  }
+
+  .fuel-type-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .price-wrapper {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .price-number {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    color: #ffffff;
+  }
+
+  .price-unit {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .price-unavailable {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .fuel-desc {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  @media (max-width: 640px) {
+    .prices-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+</style>
