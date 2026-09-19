@@ -7,6 +7,10 @@
 - [Головна сторінка](https://fuel.vdovareize.me/): Моніторинг та розрахунок цін на бензин, дизельне пальне та автогаз.
 - [Карта сайту](https://fuel.vdovareize.me/sitemap-index.xml): Повний архів та структура сторінок.
 
+## WebMCP Інструменти (Browser Tools)
+
+- [Інструменти WebMCP](https://fuel.vdovareize.me/): Сторінка підтримує WebMCP (`navigator.modelContext`). Доступні інструменти `get_fuel_prices`, `calculate_full_tank`, `calculate_trip_cost`.
+
 ## API та дані
 
 - [API цін на пальне](https://api.vdovareize.me/fuel): Публічний JSON API для отримання актуальних цінових котирувань.
