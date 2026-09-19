@@ -8,5 +8,8 @@ export default defineConfig({
   adapter: cloudflare({
     imageService: 'passthrough'
   }),
+  build: {
+    inlineStylesheets: 'always'
+  },
   integrations: [sitemap()]
 });
