@@ -38,14 +38,22 @@ const presets = [
 ];
 ---
 
-<section class="hero-control-card glass-card">
+<section class="hero-control-card glass-card" id="hero-card">
+  <!-- Top Loading Progress Bar -->
+  <div class="card-loading-bar" id="loading-bar"></div>
+
+  <!-- Glass Overlay Loader -->
+  <div class="card-loading-overlay" id="loading-overlay">
+    <div class="loading-spinner-box">
+      <span class="spinner-icon">⏳</span>
+      <span class="loading-text">Застосовуємо дату та завантажуємо ціни...</span>
+    </div>
+  </div>
+
   <div class="hero-content">
     <h1 class="hero-title">
       Середні ціни на пальне в Україні на <span class="hero-date">{formattedDate}</span>
     </h1>
-    <p class="hero-subtitle">
-      Офіційний щоденний моніторинг вартості нафтопродуктів та автогазу від Мінфіну.
-    </p>
   </div>
 
   <div class="date-picker-bar">
@@ -64,7 +72,9 @@ const presets = [
           min="2015-01-01"
           class="date-input"
         />
-        <button type="submit" class="submit-btn">Перейти</button>
+        <button type="submit" class="submit-btn" id="submit-btn">
+          <span class="btn-text">Перейти</span>
+        </button>
       </div>
     </form>
 
@@ -93,13 +103,24 @@ const presets = [
 <script>
   const form = document.getElementById('date-form') as HTMLFormElement | null;
   const input = document.getElementById('date-input') as HTMLInputElement | null;
+  const heroCard = document.getElementById('hero-card');
+  const submitBtn = document.getElementById('submit-btn');
+  const presetBtns = document.querySelectorAll('.preset-btn');
 
   if (form && input) {
     const todayISO = new Date().toISOString().split('T')[0];
     input.max = todayISO;
 
+    const showLoader = () => {
+      if (heroCard) heroCard.classList.add('is-loading');
+      if (submitBtn) {
+        (submitBtn as HTMLButtonElement).disabled = true;
+      }
+    };
+
     const navigateToDate = (val: string) => {
       if (!val) return;
+      showLoader();
       if (val > todayISO) {
         input.value = todayISO;
         window.location.href = '/';
@@ -116,6 +137,15 @@ const presets = [
     input.addEventListener('change', () => {
       navigateToDate(input.value);
     });
+
+    presetBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const href = (btn as HTMLAnchorElement).getAttribute('href');
+        if (href && window.location.pathname !== href) {
+          showLoader();
+        }
+      });
+    });
   }
 </script>
 
@@ -129,6 +159,77 @@ const presets = [
     text-align: center;
     position: relative;
     overflow: hidden;
+  }
+
+  /* Top Loading Bar */
+  .card-loading-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent-emerald), #34d399);
+    transition: width 0.3s ease;
+    z-index: 10;
+  }
+
+  .is-loading .card-loading-bar {
+    width: 100%;
+    animation: loadingProgress 1.5s infinite linear;
+  }
+
+  @keyframes loadingProgress {
+    0% { left: -30%; width: 30%; }
+    50% { left: 30%; width: 50%; }
+    100% { left: 100%; width: 30%; }
+  }
+
+  /* Glass Overlay Loader */
+  .card-loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(11, 15, 25, 0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .is-loading .card-loading-overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .loading-spinner-box {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1.4rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--accent-emerald);
+    border-radius: var(--radius-full);
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.25);
+  }
+
+  .spinner-icon {
+    font-size: 1.2rem;
+    display: inline-block;
+    animation: spin 1.2s infinite linear;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .loading-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
   }
 
   .hero-content {
@@ -149,12 +250,6 @@ const presets = [
     display: block;
     color: var(--accent-emerald);
     margin-top: 0.25rem;
-  }
-
-  .hero-subtitle {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    line-height: 1.5;
   }
 
   .date-picker-bar {
@@ -224,6 +319,11 @@ const presets = [
     opacity: 0.9;
   }
 
+  .submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
   .presets-wrapper {
     display: flex;
     align-items: center;
@@ -282,9 +382,6 @@ const presets = [
     }
     .hero-title {
       font-size: 1.65rem;
-    }
-    .hero-subtitle {
-      font-size: 0.92rem;
     }
   }
 </style>

@@ -7,6 +7,7 @@ interface Props {
   dateStr: string;
   effectiveDateStr?: string;
   canonicalUrl?: string;
+  faqSchema?: Array<{ question: string; answer: string }>;
   prices?: {
     a95Premium?: number;
     a95?: number;
@@ -22,28 +23,47 @@ const {
   dateStr,
   effectiveDateStr = dateStr,
   canonicalUrl = Astro.url.href,
+  faqSchema,
   prices
 } = Astro.props;
 
-// JSON-LD structured data for Google Rich Snippets
+// JSON-LD structured data graph for Google Rich Snippets
+const graphItems: any[] = [
+  {
+    "@type": "WebSite",
+    "@id": "https://fuel.vdovareize.me/#website",
+    "url": "https://fuel.vdovareize.me",
+    "name": "FuelPulse — Ціни на пальне в Україні",
+    "description": "Щоденний моніторинг середніх цін на пальне в Україні: А-95, Дизель, Газ",
+    "inLanguage": "uk-UA"
+  },
+  {
+    "@type": "Dataset",
+    "name": `Ціни на пальне в Україні на ${effectiveDateStr}`,
+    "description": description,
+    "variableMeasured": ["Бензин А-95", "Дизельне пальне", "Автогаз"],
+    "temporalCoverage": effectiveDateStr,
+    "license": "https://creativecommons.org/licenses/by/4.0/"
+  }
+];
+
+if (faqSchema && faqSchema.length > 0) {
+  graphItems.push({
+    "@type": "FAQPage",
+    "mainEntity": faqSchema.map(item => ({
+      "@type": "Question",
+      "name": item.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": item.answer
+      }
+    }))
+  });
+}
+
 const schemaData = {
   "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      "@id": "https://fuel-ua.pages.dev/#website",
-      "url": "https://fuel-ua.pages.dev",
-      "name": "Пальне в Україні — Середні ціни",
-      "description": "Щоденний моніторинг середніх цін на пальне в Україні: А-95, Дизель, Газ"
-    },
-    {
-      "@type": "Dataset",
-      "name": `Ціни на пальне в Україні на ${effectiveDateStr}`,
-      "description": description,
-      "variableMeasured": ["Бензин А-95", "Дизельне пальне", "Автогаз"],
-      "temporalCoverage": effectiveDateStr
-    }
-  ]
+  "@graph": graphItems
 };
 ---
 
@@ -53,24 +73,33 @@ const schemaData = {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#0b0f19" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
 
     <!-- SEO Meta Tags -->
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
     <meta name="robots" content="index, follow" />
+    <meta name="language" content="Ukrainian" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="FuelPulse" />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:locale" content="uk_UA" />
+    <meta property="og:image" content="https://fuel.vdovareize.me/favicon.svg" />
 
     <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content="https://fuel.vdovareize.me/favicon.svg" />
 
     <!-- Schema.org JSON-LD -->
     <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />

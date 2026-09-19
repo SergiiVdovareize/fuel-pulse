@@ -3,7 +3,7 @@ import cloudflare from '@astrojs/cloudflare';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://fuel-ua.pages.dev',
+  site: 'https://fuel.vdovareize.me',
   output: 'server',
   adapter: cloudflare({
     imageService: 'passthrough'
