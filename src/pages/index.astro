@@ -27,10 +27,10 @@ const pageDescription = `Актуальні середні ціни на пал�
   <div class="container">
     <!-- Hero Section -->
     <section class="hero-section">
-      <div class="hero-badge">
+      <div class={`hero-badge ${data.hasError ? 'error-badge' : ''}`}>
         <span class="pulse-indicator"></span>
         <span>
-          {data.isFallback ? 'Останні доступні дані' : 'Оновлено сьогодні'}
+          {data.hasError ? 'Дані відсутні' : 'Оновлено сьогодні'}
         </span>
       </div>
 
@@ -43,7 +43,15 @@ const pageDescription = `Актуальні середні ціни на пал�
       </p>
 
       {
-        data.effectiveDate !== data.requestedDate && (
+        data.hasError && (
+          <div class="error-alert">
+            ⚠️ На жаль, інформація про ціни на пальне на запитану дату ({data.requestedDate}) відсутня або сервіс моніторингу тимчасово недоступний.
+          </div>
+        )
+      }
+
+      {
+        !data.hasError && data.effectiveDate !== data.requestedDate && (
           <div class="date-alert">
             ℹ️ Увага: на запитану дату ({data.requestedDate}) діють показники від {data.effectiveDate} (вихідний або святковий день на біржах).
           </div>
@@ -154,6 +162,27 @@ const pageDescription = `Актуальні середні ціни на пал�
     border-radius: var(--radius-md);
     color: #fbbf24;
     font-size: 0.85rem;
+  }
+
+  .error-alert {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius-md);
+    color: #f87171;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .error-badge {
+    background: rgba(239, 68, 68, 0.1) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    color: #f87171 !important;
+  }
+
+  .error-badge .pulse-indicator {
+    background: #ef4444 !important;
   }
 
   .tools-section {

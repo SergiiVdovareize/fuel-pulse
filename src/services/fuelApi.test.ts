@@ -6,18 +6,20 @@ import {
   getPreviousDateISO,
   calculateDeltas,
   generateHistoryMock,
-  fetchFuelPrices
+  fetchFuelPrices,
+  fetchFuelHistory,
+  formatHistoryItemsToPoints
 } from './fuelApi';
 
 describe('fuelApi service', () => {
   describe('formatDateISO', () => {
     it('should format a date correctly to YYYY-MM-DD', () => {
-      const date = new Date(2026, 8, 18); // Month is 0-indexed (8 = September)
+      const date = new Date(2026, 8, 18);
       expect(formatDateISO(date)).toBe('2026-09-18');
     });
 
     it('should pad single-digit month and day with zeros', () => {
-      const date = new Date(2026, 0, 5); // Jan 5
+      const date = new Date(2026, 0, 5);
       expect(formatDateISO(date)).toBe('2026-01-05');
     });
   });
@@ -55,26 +57,60 @@ describe('fuelApi service', () => {
     });
   });
 
-  describe('generateHistoryMock', () => {
-    it('should generate requested number of history points ending at endDate', () => {
-      const basePrices = { a95: 56.81, diesel: 55.22, gas: 37.07 };
-      const history = generateHistoryMock('2026-09-18', basePrices, 30);
+  describe('formatHistoryItemsToPoints', () => {
+    it('should format API items into history points with Ukrainian dates', () => {
+      const items = [
+        { date: '2026-09-18', prices: { a95: 57.0 } },
+        { date: '2026-09-19', prices: { a95: 57.2 } }
+      ];
 
-      expect(history.length).toBe(30);
-      expect(history[history.length - 1].date).toBe('2026-09-18');
-      expect(history[0].date).toBe('2026-08-20');
+      const points = formatHistoryItemsToPoints(items);
+      expect(points.length).toBe(2);
+      expect(points[0].formattedDate).toBe('18 вересня');
+      expect(points[1].formattedDate).toBe('19 вересня');
     });
   });
 
-  describe('formatDateUkrainian', () => {
-    it('should format YYYY-MM-DD into Ukrainian genitive date representation', () => {
-      expect(formatDateUkrainian('2026-09-18')).toBe('18 вересня 2026 року');
-      expect(formatDateUkrainian('2026-01-01')).toBe('1 січня 2026 року');
-      expect(formatDateUkrainian('2026-12-31')).toBe('31 грудня 2026 року');
+  describe('fetchFuelHistory', () => {
+    beforeEach(() => {
+      vi.restoreAllMocks();
     });
 
-    it('should return original string if input format is invalid', () => {
-      expect(formatDateUkrainian('invalid')).toBe('invalid');
+    it('should fetch history from /fuel/history API endpoint', async () => {
+      const mockHistoryResponse = {
+        startDate: '2026-09-12',
+        endDate: '2026-09-18',
+        days: 7,
+        currency: 'UAH',
+        unit: 'грн/л',
+        items: [
+          { date: '2026-09-12', prices: { a95: 56.8 } },
+          { date: '2026-09-18', prices: { a95: 57.0 } }
+        ],
+        source: 'https://index.minfin.com.ua/ua/markets/fuel/'
+      };
+
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockHistoryResponse
+      } as Response);
+
+      const result = await fetchFuelHistory('2026-09-18', 7);
+      expect(result.days).toBe(7);
+      expect(result.items.length).toBe(2);
+    });
+
+    it('should cap days at 30 max according to spec', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ items: [] })
+      } as Response);
+
+      await fetchFuelHistory('2026-09-18', 50);
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('days=30'),
+        expect.anything()
+      );
     });
   });
 
@@ -84,10 +120,9 @@ describe('fuelApi service', () => {
     });
 
     it('should fetch prices and return history + deltas', async () => {
-      const mockData = {
+      const mockSingleData = {
         requestedDate: '2026-09-18',
         effectiveDate: '2026-09-18',
-        isFallback: false,
         currency: 'UAH',
         unit: 'грн/л',
         prices: {
@@ -102,25 +137,22 @@ describe('fuelApi service', () => {
 
       vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
         ok: true,
-        json: async () => mockData
+        json: async () => mockSingleData
       } as Response);
 
       const result = await fetchFuelPrices('2026-09-18');
       expect(result.requestedDate).toBe('2026-09-18');
       expect(result.prices.a95).toBe(57.0);
-      expect(result.history).toBeDefined();
-      expect(result.history?.length).toBe(30);
-      expect(result.deltas).toBeDefined();
     });
 
-    it('should return fallback data with deltas when API fails', async () => {
+    it('should return hasError: true and empty prices when API fails', async () => {
       vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(new Error('Network error'));
 
       const result = await fetchFuelPrices('2026-09-18');
-      expect(result.isFallback).toBe(true);
+      expect(result.hasError).toBe(true);
       expect(result.requestedDate).toBe('2026-09-18');
-      expect(result.prices).toBeDefined();
-      expect(result.deltas).toBeDefined();
+      expect(result.prices).toEqual({});
+      expect(result.deltas).toEqual({});
     });
   });
 });

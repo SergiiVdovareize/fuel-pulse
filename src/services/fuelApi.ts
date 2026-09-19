@@ -1,4 +1,11 @@
-import type { FuelApiResponse, FuelDeltas, FuelHistoryPoint, FuelPrices } from '../types/fuel';
+import type {
+  FuelApiResponse,
+  FuelDeltas,
+  FuelHistoryItem,
+  FuelHistoryPoint,
+  FuelHistoryResponse,
+  FuelPrices
+} from '../types/fuel';
 
 const BASE_API_URL = 'https://api.vdovareize.me/fuel';
 
@@ -42,7 +49,7 @@ export function formatDateUkrainian(dateStr: string): string {
  * Обчислення різниці між цінами сьогодні та попереднього дня
  */
 export function calculateDeltas(current: FuelPrices, previous: FuelPrices): FuelDeltas {
-  const keys: (keyof FuelPrices)[] = ['a95Premium', 'a95', 'a92', 'diesel', 'gas'];
+  const keys: (keyof FuelPrices)[] = ['a95Premium', 'a95', 'a92', 'diesel', 'dieselPremium', 'gas'];
   const deltas: FuelDeltas = {};
 
   keys.forEach((key) => {
@@ -58,46 +65,14 @@ export function calculateDeltas(current: FuelPrices, previous: FuelPrices): Fuel
 }
 
 /**
- * Генерація масиву історії цін за останні N днів
+ * Отримання історії цін з API (`GET /fuel/history?endDate=...&days=30`)
+ * Максимум 30 днів за вимогою бекенд-контракту.
  */
-export function generateHistoryMock(endDateStr: string, basePrices: FuelPrices, daysCount = 30): FuelHistoryPoint[] {
-  const history: FuelHistoryPoint[] = [];
-  const endDate = new Date(endDateStr);
+export async function fetchFuelHistory(endDateStr?: string, days = 30): Promise<FuelHistoryResponse> {
+  const targetEndDate = endDateStr && isValidDateFormat(endDateStr) ? endDateStr : formatDateISO(new Date());
+  const validDays = Math.min(Math.max(1, days), 30); // Обмеження 1..30 днів
 
-  for (let i = daysCount - 1; i >= 0; i--) {
-    const d = new Date(endDate);
-    d.setDate(d.getDate() - i);
-    const dateIso = formatDateISO(d);
-
-    // Легкі реалістичні коливання ціни для імітації тренду (-1.5 грн до +1.0 грн за 30 днів)
-    const trendFactor = (i / daysCount) * -0.6 + Math.sin(i * 0.5) * 0.15;
-    
-    const prices: FuelPrices = {
-      a95Premium: basePrices.a95Premium ? Math.round((basePrices.a95Premium + trendFactor * 0.8) * 100) / 100 : undefined,
-      a95: basePrices.a95 ? Math.round((basePrices.a95 + trendFactor) * 100) / 100 : undefined,
-      a92: basePrices.a92 ? Math.round((basePrices.a92 + trendFactor * 0.9) * 100) / 100 : undefined,
-      diesel: basePrices.diesel ? Math.round((basePrices.diesel + trendFactor * 1.1) * 100) / 100 : undefined,
-      gas: basePrices.gas ? Math.round((basePrices.gas + trendFactor * 0.4) * 100) / 100 : undefined,
-    };
-
-    history.push({
-      date: dateIso,
-      formattedDate: `${d.getDate()} ${MONTHS_UK_GENITIVE[d.getMonth()]}`,
-      prices
-    });
-  }
-
-  return history;
-}
-
-/**
- * Отримання цін на пальне на задану дату разом з дельтами та історією
- */
-export async function fetchFuelPrices(dateStr?: string): Promise<FuelApiResponse> {
-  const targetDate = dateStr && isValidDateFormat(dateStr) ? dateStr : formatDateISO(new Date());
-  const url = `${BASE_API_URL}?date=${targetDate}`;
-
-  let apiResponse: FuelApiResponse;
+  const url = `${BASE_API_URL}/history?endDate=${targetEndDate}&days=${validDays}`;
 
   try {
     const res = await fetch(url, {
@@ -110,40 +85,118 @@ export async function fetchFuelPrices(dateStr?: string): Promise<FuelApiResponse
       throw new Error(`API error: status ${res.status}`);
     }
 
-    apiResponse = await res.json();
+    return await res.json();
   } catch (error) {
-    console.error(`[fetchFuelPrices] Failed to fetch for date ${targetDate}:`, error);
-    apiResponse = {
-      requestedDate: targetDate,
-      effectiveDate: targetDate,
-      isFallback: true,
+    console.error(`[fetchFuelHistory] Failed to fetch history for ${targetEndDate}:`, error);
+    // При помилці або відсутності ендпоінта повертаємо порожню структуру відповідно до контракту
+    return {
+      startDate: targetEndDate,
+      endDate: targetEndDate,
+      days: validDays,
       currency: 'UAH',
       unit: 'грн/л',
-      prices: {
-        a95Premium: 59.99,
-        a95: 56.81,
-        a92: 53.80,
-        diesel: 55.22,
-        gas: 37.07
-      },
+      items: [],
       source: 'https://index.minfin.com.ua/ua/markets/fuel/'
     };
   }
+}
 
-  // Генерація історії та дельт
-  const history = generateHistoryMock(apiResponse.effectiveDate, apiResponse.prices, 30);
-  const prevPoint = history[history.length - 2];
-  const deltas = prevPoint ? calculateDeltas(apiResponse.prices, prevPoint.prices) : {
-    a95Premium: 0.15,
-    a95: -0.10,
-    a92: 0.00,
-    diesel: 0.25,
-    gas: -0.05
-  };
+/**
+ * Отримання сирих даних від API на одну конкретну дату
+ */
+async function fetchSingleDatePrices(targetDate: string): Promise<FuelApiResponse> {
+  const url = `${BASE_API_URL}?date=${targetDate}`;
+
+  try {
+    const res = await fetch(url, {
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!res.ok) {
+      throw new Error(`API error: status ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error(`[fetchSingleDatePrices] Failed to fetch for date ${targetDate}:`, error);
+    return {
+      requestedDate: targetDate,
+      effectiveDate: targetDate,
+      hasError: true,
+      currency: 'UAH',
+      unit: 'грн/л',
+      prices: {},
+      source: 'https://index.minfin.com.ua/ua/markets/fuel/'
+    };
+  }
+}
+
+/**
+ * Форматування FuelHistoryItem[] у FuelHistoryPoint[] для компонента графіків
+ */
+export function formatHistoryItemsToPoints(items: FuelHistoryItem[]): FuelHistoryPoint[] {
+  return items.map((item) => {
+    const parts = item.date.split('-');
+    let formattedDate = item.date;
+    if (parts.length === 3) {
+      const monthIdx = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      formattedDate = `${day} ${MONTHS_UK_GENITIVE[monthIdx] || ''}`;
+    }
+
+    return {
+      date: item.date,
+      formattedDate,
+      prices: item.prices
+    };
+  });
+}
+
+/**
+ * Отримання цін на пальне на задану дату разом з дельтами та історією
+ */
+export async function fetchFuelPrices(dateStr?: string): Promise<FuelApiResponse> {
+  const targetDate = dateStr && isValidDateFormat(dateStr) ? dateStr : formatDateISO(new Date());
+  
+  // 1. Отримуємо ціни на обрану дату з API
+  const currentData = await fetchSingleDatePrices(targetDate);
+  
+  const hasCurrentPrices = Object.values(currentData.prices).some(v => typeof v === 'number' && v > 0);
+
+  if (currentData.hasError || !hasCurrentPrices) {
+    return {
+      ...currentData,
+      deltas: {},
+      history: []
+    };
+  }
+
+  // 2. Спроба отримати реальну історію за останні 30 днів через новий ендпоінт GET /fuel/history
+  const historyResponse = await fetchFuelHistory(currentData.effectiveDate, 30);
+  
+  let historyPoints: FuelHistoryPoint[] = [];
+  let deltas: FuelDeltas = {};
+
+  if (historyResponse.items && historyResponse.items.length > 0) {
+    historyPoints = formatHistoryItemsToPoints(historyResponse.items);
+    // Обчислюємо дельту з передостаннього запису в масиві items
+    if (historyResponse.items.length >= 2) {
+      const lastItem = historyResponse.items[historyResponse.items.length - 1];
+      const prevItem = historyResponse.items[historyResponse.items.length - 2];
+      deltas = calculateDeltas(lastItem.prices, prevItem.prices);
+    }
+  } else {
+    // Якщо ендпоінт /fuel/history ще не повернув даних, отримуємо ціни на попередній день напряму
+    const prevDateStr = getPreviousDateISO(currentData.effectiveDate);
+    const prevData = await fetchSingleDatePrices(prevDateStr);
+    deltas = calculateDeltas(currentData.prices, prevData.prices);
+  }
 
   return {
-    ...apiResponse,
+    ...currentData,
     deltas,
-    history
+    history: historyPoints
   };
 }

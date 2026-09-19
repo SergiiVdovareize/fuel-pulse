@@ -3,6 +3,7 @@ export interface FuelPrices {
   a95?: number;
   a92?: number;
   diesel?: number;
+  dieselPremium?: number;
   gas?: number;
 }
 
@@ -11,6 +12,7 @@ export interface FuelDeltas {
   a95?: number;
   a92?: number;
   diesel?: number;
+  dieselPremium?: number;
   gas?: number;
 }
 
@@ -20,10 +22,26 @@ export interface FuelHistoryPoint {
   prices: FuelPrices;
 }
 
+export interface FuelHistoryItem {
+  date: string;
+  prices: FuelPrices;
+}
+
+export interface FuelHistoryResponse {
+  startDate: string;
+  endDate: string;
+  days: number;
+  currency: string;
+  unit: string;
+  items: FuelHistoryItem[];
+  source: string;
+}
+
 export interface FuelApiResponse {
   requestedDate: string;
   effectiveDate: string;
-  isFallback: boolean;
+  isFallback?: boolean;
+  hasError?: boolean;
   currency: string;
   unit: string;
   prices: FuelPrices;
