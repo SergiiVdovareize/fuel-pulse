@@ -13,7 +13,13 @@ const { prices, dateStr, formattedDate: customFormattedDate } = Astro.props;
 const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateStr) : undefined);
 ---
 
-<div class="trip-card glass-card">
+<form 
+  class="trip-card glass-card"
+  toolname="calculate_trip_cost"
+  tooldescription="Розрахувати витрати пального та підсумкову вартість поїздки за відстанню (км) і середньою витратою (л/100км)"
+  toolautosubmit
+  on-submit="return false;"
+>
   <div class="trip-header">
     <div class="trip-icon">🗺️</div>
     <div>
@@ -30,11 +36,13 @@ const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateSt
       <input 
         type="number" 
         id="distance-input" 
+        name="distanceKm"
         value="100" 
         min="1" 
         max="5000" 
         step="10"
         class="custom-input"
+        toolparamdescription="Відстань запланованого маршруту в кілометрах (наприклад, 150)"
       />
     </div>
 
@@ -43,17 +51,24 @@ const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateSt
       <input 
         type="number" 
         id="consumption-input" 
+        name="consumptionPer100km"
         value="7.5" 
         min="1" 
         max="30" 
         step="0.5"
         class="custom-input"
+        toolparamdescription="Середня витрата пального автомобілем на 100 км (наприклад, 8.5)"
       />
     </div>
 
     <div class="input-field">
       <label for="fuel-select">Вид пального:</label>
-      <select id="fuel-select" class="custom-input custom-select">
+      <select 
+        id="fuel-select" 
+        name="fuelType"
+        class="custom-input custom-select"
+        toolparamdescription="Обраний тип пального (грн/л)"
+      >
         {
           FUEL_METAS.map((fuel) => {
             const price = prices[fuel.key];
@@ -82,7 +97,7 @@ const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateSt
       <span class="metric-value"><strong id="trip-total-sum">426</strong> грн</span>
     </div>
   </div>
-</div>
+</form>
 
 <script>
   const distanceInput = document.getElementById('distance-input') as HTMLInputElement | null;

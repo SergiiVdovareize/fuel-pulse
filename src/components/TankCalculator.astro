@@ -14,7 +14,13 @@ const { prices, unit, dateStr, formattedDate: customFormattedDate } = Astro.prop
 const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateStr) : undefined);
 ---
 
-<div class="calculator-card glass-card">
+<form 
+  class="calculator-card glass-card"
+  toolname="calculate_full_tank"
+  tooldescription="Розрахувати вартість заправки повного паливного бака автомобіля за об'ємом (літри) та типом пального"
+  toolautosubmit
+  on-submit="return false;"
+>
   <div class="calc-header">
     <div class="calc-icon">🔋</div>
     <div>
@@ -34,11 +40,13 @@ const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateSt
       <input 
         type="range" 
         id="tank-slider" 
+        name="tankVolumeLiters"
         min="10" 
         max="100" 
         value="50" 
         step="1"
         class="slider"
+        toolparamdescription="Об'єм паливного бака в літрах (від 10 до 100 л)"
       />
     </div>
 
@@ -76,7 +84,7 @@ const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateSt
       })
     }
   </div>
-</div>
+</form>
 
 <script>
   const slider = document.getElementById('tank-slider') as HTMLInputElement | null;
