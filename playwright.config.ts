@@ -33,8 +33,14 @@ export default defineConfig({
     {
       name: 'Mobile Chrome',
       use: {
-        ...devices['iPhone 14'],
+        ...devices['Pixel 7'],
         launchOptions: { args: ['--disable-lcd-text', '--font-render-hinting=none'] },
+      },
+    },
+    {
+      name: 'Mobile Safari',
+      use: {
+        ...devices['iPhone 14'],
       },
     },
   ],
