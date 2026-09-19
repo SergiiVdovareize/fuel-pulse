@@ -10,11 +10,11 @@ interface Props {
   formattedDate?: string;
 }
 
-const { prices, unit, dateStr, formattedDate: customFormattedDate } = Astro.props;
+const { prices, dateStr, formattedDate: customFormattedDate } = Astro.props;
 const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateStr) : undefined);
 ---
 
-<form 
+<form
   class="calculator-card glass-card"
   toolname="calculate_full_tank"
   tooldescription="Розрахувати вартість заправки повного паливного бака автомобіля за об'ємом (літри) та типом пального"
@@ -26,7 +26,8 @@ const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateSt
     <div>
       <h3 class="calc-title">Калькулятор повного бака</h3>
       <p class="calc-subtitle">
-        Скільки коштуватиме заправити бак {displayDate ? `за цінами на ${displayDate}` : 'на обрану дату'}
+        Скільки коштуватиме заправити бак{' '}
+        {displayDate ? `за цінами на ${displayDate}` : 'на обрану дату'}
       </p>
     </div>
   </div>
@@ -35,15 +36,17 @@ const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateSt
     <div class="slider-group">
       <div class="slider-header">
         <label for="tank-slider">Об'єм бака:</label>
-        <span class="liters-display"><strong id="liters-value">50</strong> л</span>
+        <span class="liters-display">
+          <strong id="liters-value">50</strong> л
+        </span>
       </div>
-      <input 
-        type="range" 
-        id="tank-slider" 
+      <input
+        type="range"
+        id="tank-slider"
         name="tankVolumeLiters"
-        min="10" 
-        max="100" 
-        value="50" 
+        min="10"
+        max="100"
+        value="50"
         step="1"
         class="slider"
         toolparamdescription="Об'єм паливного бака в літрах (від 10 до 100 л)"
@@ -51,38 +54,46 @@ const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateSt
     </div>
 
     <div class="presets-buttons">
-      <button type="button" class="tank-preset" data-liters="35">35 л (Хетчбек)</button>
-      <button type="button" class="tank-preset" data-liters="50">50 л (Седан)</button>
-      <button type="button" class="tank-preset" data-liters="65">65 л (Кросовер)</button>
-      <button type="button" class="tank-preset" data-liters="80">80 л (Позашляховик)</button>
+      <button type="button" class="tank-preset" data-liters="35">
+        35 л (Хетчбек)
+      </button>
+      <button type="button" class="tank-preset" data-liters="50">
+        50 л (Седан)
+      </button>
+      <button type="button" class="tank-preset" data-liters="65">
+        65 л (Кросовер)
+      </button>
+      <button type="button" class="tank-preset" data-liters="80">
+        80 л (Позашляховик)
+      </button>
     </div>
   </div>
 
   <div class="tank-results-grid">
-    {
-      FUEL_METAS.map((fuel) => {
-        const price = prices[fuel.key];
-        const isAvailable = typeof price === 'number' && price > 0;
-        const initialTotal = isAvailable ? (price * 50).toFixed(0) : '0';
+    {FUEL_METAS.map((fuel) => {
+      const price = prices[fuel.key];
+      const isAvailable = typeof price === 'number' && price > 0;
+      const initialTotal = isAvailable ? (price * 50).toFixed(0) : '0';
 
-        return (
-          <div class="tank-result-item" data-fuel-key={fuel.key} data-price={price ?? 0}>
-            <div class="result-fuel-info">
-              <span class="dot" style={`background: ${fuel.badgeColor};`}></span>
-              <span class="fuel-name">{fuel.shortName}</span>
-            </div>
-            {isAvailable ? (
-              <div class="result-amount">
-                <span class="sum-value" id={`sum-${fuel.key}`}>{initialTotal}</span>
-                <span class="sum-currency">грн</span>
-              </div>
-            ) : (
-              <span class="no-price">—</span>
-            )}
+      return (
+        <div class="tank-result-item" data-fuel-key={fuel.key} data-price={price ?? 0}>
+          <div class="result-fuel-info">
+            <span class="dot" style={`background: ${fuel.badgeColor};`}></span>
+            <span class="fuel-name">{fuel.shortName}</span>
           </div>
-        );
-      })
-    }
+          {isAvailable ? (
+            <div class="result-amount">
+              <span class="sum-value" id={`sum-${fuel.key}`}>
+                {initialTotal}
+              </span>
+              <span class="sum-currency">грн</span>
+            </div>
+          ) : (
+            <span class="no-price">—</span>
+          )}
+        </div>
+      );
+    })}
   </div>
 </form>
 

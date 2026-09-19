@@ -23,47 +23,46 @@ const {
   dateStr,
   effectiveDateStr = dateStr,
   canonicalUrl = Astro.url.href,
-  faqSchema,
-  prices
+  faqSchema
 } = Astro.props;
 
 // JSON-LD structured data graph for Google Rich Snippets
 const graphItems: any[] = [
   {
-    "@type": "WebSite",
-    "@id": "https://fuel.vdovareize.me/#website",
-    "url": "https://fuel.vdovareize.me",
-    "name": "FuelPulse — Ціни на пальне в Україні",
-    "description": "Щоденний моніторинг середніх цін на пальне в Україні: А-95, Дизель, Газ",
-    "inLanguage": "uk-UA"
+    '@type': 'WebSite',
+    '@id': 'https://fuel.vdovareize.me/#website',
+    url: 'https://fuel.vdovareize.me',
+    name: 'FuelPulse — Ціни на пальне в Україні',
+    description: 'Щоденний моніторинг середніх цін на пальне в Україні: А-95, Дизель, Газ',
+    inLanguage: 'uk-UA'
   },
   {
-    "@type": "Dataset",
-    "name": `Ціни на пальне в Україні на ${effectiveDateStr}`,
-    "description": description,
-    "variableMeasured": ["Бензин А-95", "Дизельне пальне", "Автогаз"],
-    "temporalCoverage": effectiveDateStr,
-    "license": "https://creativecommons.org/licenses/by/4.0/"
+    '@type': 'Dataset',
+    name: `Ціни на пальне в Україні на ${effectiveDateStr}`,
+    description: description,
+    variableMeasured: ['Бензин А-95', 'Дизельне пальне', 'Автогаз'],
+    temporalCoverage: effectiveDateStr,
+    license: 'https://creativecommons.org/licenses/by/4.0/'
   }
 ];
 
 if (faqSchema && faqSchema.length > 0) {
   graphItems.push({
-    "@type": "FAQPage",
-    "mainEntity": faqSchema.map(item => ({
-      "@type": "Question",
-      "name": item.question,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": item.answer
+    '@type': 'FAQPage',
+    mainEntity: faqSchema.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer
       }
     }))
   });
 }
 
 const schemaData = {
-  "@context": "https://schema.org",
-  "@graph": graphItems
+  '@context': 'https://schema.org',
+  '@graph': graphItems
 };
 ---
 
@@ -106,7 +105,7 @@ const schemaData = {
     <meta name="twitter:image" content="https://fuel.vdovareize.me/favicon.svg" />
 
     <!-- Schema.org JSON-LD -->
-    <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
+    <script type="application/ld+json" set:html={JSON.stringify(schemaData)}></script>
   </head>
   <body>
     <header class="site-header">
@@ -114,7 +113,9 @@ const schemaData = {
         <a href="/" class="brand">
           <div class="brand-badge">⛽️</div>
           <div class="brand-text">
-            <span class="brand-title">Fuel<span class="highlight">Pulse</span></span>
+            <span class="brand-title">
+              Fuel<span class="highlight">Pulse</span>
+            </span>
             <span class="brand-sub">Ціни на пальне в Україні</span>
           </div>
         </a>
@@ -133,8 +134,15 @@ const schemaData = {
     <footer class="site-footer">
       <div class="container footer-inner">
         <p class="footer-copy">
-          © {new Date().getFullYear()} FuelPulse. Дані засновані на офіційному моніторингу цін 
-          <a href="https://index.minfin.com.ua/ua/markets/fuel/" target="_blank" rel="noopener noreferrer">index.minfin.com.ua</a>.
+          © {new Date().getFullYear()} FuelPulse. Дані засновані на офіційному моніторингу цін
+          <a
+            href="https://index.minfin.com.ua/ua/markets/fuel/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            index.minfin.com.ua
+          </a>
+          .
         </p>
         <p class="footer-note">
           Ціни вказано в гривнях за літр (грн/л) без урахування персональних знижок у мережах АЗС.
@@ -222,9 +230,18 @@ const schemaData = {
   }
 
   @keyframes pulse {
-    0% { transform: scale(0.95); opacity: 0.8; }
-    50% { transform: scale(1.2); opacity: 1; }
-    100% { transform: scale(0.95); opacity: 0.8; }
+    0% {
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
   }
 
   .main-content {

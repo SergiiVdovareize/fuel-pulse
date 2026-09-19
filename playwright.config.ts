@@ -12,14 +12,14 @@ export default defineConfig({
       '@argos-ci/playwright/reporter',
       {
         // Argos reporter configuration
-        uploadToArgos: !!process.env.ARGOS_TOKEN,
-      },
-    ],
+        uploadToArgos: !!process.env.ARGOS_TOKEN
+      }
+    ]
   ],
   use: {
     baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4321',
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
+    screenshot: 'only-on-failure'
   },
   projects: [
     {
@@ -27,27 +27,27 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 900 },
-        launchOptions: { args: ['--disable-lcd-text', '--font-render-hinting=none'] },
-      },
+        launchOptions: { args: ['--disable-lcd-text', '--font-render-hinting=none'] }
+      }
     },
     {
       name: 'Mobile Chrome',
       use: {
         ...devices['Pixel 7'],
-        launchOptions: { args: ['--disable-lcd-text', '--font-render-hinting=none'] },
-      },
+        launchOptions: { args: ['--disable-lcd-text', '--font-render-hinting=none'] }
+      }
     },
     {
       name: 'Mobile Safari',
       use: {
-        ...devices['iPhone 14'],
-      },
-    },
+        ...devices['iPhone 14']
+      }
+    }
   ],
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:4321',
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-  },
+    timeout: 120 * 1000
+  }
 });

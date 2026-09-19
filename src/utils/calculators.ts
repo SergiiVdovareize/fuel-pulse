@@ -68,7 +68,10 @@ export function calculateTripCost(
 /**
  * Compares a historical price with today's price (Variant A).
  */
-export function calculateTodayComparison(pastPrice?: number, todayPrice?: number): TodayComparisonResult | null {
+export function calculateTodayComparison(
+  pastPrice?: number,
+  todayPrice?: number
+): TodayComparisonResult | null {
   if (
     typeof pastPrice !== 'number' ||
     typeof todayPrice !== 'number' ||

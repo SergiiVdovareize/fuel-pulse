@@ -6,7 +6,12 @@ import DatePicker from '../components/DatePicker.astro';
 import TankCalculator from '../components/TankCalculator.astro';
 import TripCalculator from '../components/TripCalculator.astro';
 import ShareBar from '../components/ShareBar.astro';
-import { fetchFuelPrices, formatDateUkrainian, formatDateISO, isValidDateFormat } from '../services/fuelApi';
+import {
+  fetchFuelPrices,
+  formatDateUkrainian,
+  formatDateISO,
+  isValidDateFormat
+} from '../services/fuelApi';
 
 const { date } = Astro.params;
 const todayISO = formatDateISO(new Date());
@@ -17,10 +22,7 @@ if (!date || !isValidDateFormat(date) || date > todayISO) {
 }
 
 // Отримання даних за обрану дату та за сьогодні (для порівняння)
-const [data, todayData] = await Promise.all([
-  fetchFuelPrices(date),
-  fetchFuelPrices()
-]);
+const [data, todayData] = await Promise.all([fetchFuelPrices(date), fetchFuelPrices()]);
 
 const formattedDate = formatDateUkrainian(data.requestedDate || data.effectiveDate);
 
@@ -28,7 +30,7 @@ const pageTitle = `Ціни на пальне в Україні на ${formatted
 const pageDescription = `Середня ціна пального в Україні на ${formattedDate}: А-95 — ${data.prices.a95?.toFixed(2) ?? '—'} грн/л, ДП — ${data.prices.diesel?.toFixed(2) ?? '—'} грн/л, Газ — ${data.prices.gas?.toFixed(2) ?? '—'} грн/л. Офіційні дані.`;
 ---
 
-<Layout 
+<Layout
   title={pageTitle}
   description={pageDescription}
   dateStr={data.requestedDate}
@@ -37,35 +39,34 @@ const pageDescription = `Середня ціна пального в Украї�
 >
   <div class="container">
     <!-- Unified Hero Control Card & Date Selector -->
-    <DatePicker 
-      currentDate={data.requestedDate || data.effectiveDate} 
+    <DatePicker
+      currentDate={data.requestedDate || data.effectiveDate}
       formattedDate={formattedDate}
     />
 
-    {
-      data.hasError && (
-        <div class="error-alert">
-          ⚠️ На жаль, інформація про ціни на пальне на запитану дату ({data.requestedDate}) відсутня або сервіс моніторингу тимчасово недоступний.
-        </div>
-      )
-    }
+    {data.hasError && (
+      <div class="error-alert">
+        ⚠️ На жаль, інформація про ціни на пальне на запитану дату ({data.requestedDate}) відсутня
+        або сервіс моніторингу тимчасово недоступний.
+      </div>
+    )}
 
     <!-- Main Fuel Price Cards with Deltas and Today Comparison -->
-    <FuelCards 
-      prices={data.prices} 
-      deltas={data.deltas} 
+    <FuelCards
+      prices={data.prices}
+      deltas={data.deltas}
       todayPrices={data.effectiveDate !== todayData.effectiveDate ? todayData.prices : undefined}
-      unit={data.unit} 
+      unit={data.unit}
     />
 
     <!-- 7/30-Day Trend Chart -->
     {data.history && <TrendChart history={data.history} formattedDate={formattedDate} />}
 
     <!-- Share Bar -->
-    <ShareBar 
-      dateStr={data.requestedDate} 
-      effectiveDateStr={data.effectiveDate} 
-      prices={data.prices} 
+    <ShareBar
+      dateStr={data.requestedDate}
+      effectiveDateStr={data.effectiveDate}
+      prices={data.prices}
     />
 
     <!-- Calculators Section -->

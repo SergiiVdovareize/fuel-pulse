@@ -14,16 +14,19 @@ const data = await fetchFuelPrices(todayISO);
 const formattedDate = formatDateUkrainian(data.requestedDate || data.effectiveDate);
 const faqItems = [
   {
-    question: "Звідки беруться ціни на пальне?",
-    answer: "Дані базуються на щоденному моніторингу середньозважених роздрібних цін мереж АЗС України, який веде портал Міністерства фінансів (index.minfin.com.ua)."
+    question: 'Звідки беруться ціни на пальне?',
+    answer:
+      'Дані базуються на щоденному моніторингу середньозважених роздрібних цін мереж АЗС України, який веде портал Міністерства фінансів (index.minfin.com.ua).'
   },
   {
-    question: "Чи враховані персональні знижки мереж (ОККО, WOG тощо)?",
-    answer: "Ні, сервіс відображає ціни на стелі АЗС. За програмами лояльності або додатками мереж реальна вартість заправки може бути на 2–5 грн/л нижчою."
+    question: 'Чи враховані персональні знижки мереж (ОККО, WOG тощо)?',
+    answer:
+      'Ні, сервіс відображає ціни на стелі АЗС. За програмами лояльності або додатками мереж реальна вартість заправки може бути на 2–5 грн/л нижчою.'
   },
   {
-    question: "Чому ціни можуть не змінюватися кілька днів?",
-    answer: "У вихідні та святкові дні оптові трейдери та біржі не оновлюють котирування, тому на суботу-неділю зазвичай діють зафіксовані п'ятничні ціни."
+    question: 'Чому ціни можуть не змінюватися кілька днів?',
+    answer:
+      "У вихідні та святкові дні оптові трейдери та біржі не оновлюють котирування, тому на суботу-неділю зазвичай діють зафіксовані п'ятничні ціни."
   }
 ];
 
@@ -31,7 +34,7 @@ const pageTitle = `Ціни на пальне в Україні на ${formatted
 const pageDescription = `Актуальні середні ціни на пальне в Україні станом на ${formattedDate}: бензин А-95 — ${data.prices.a95?.toFixed(2) ?? '—'} грн/л, дизель — ${data.prices.diesel?.toFixed(2) ?? '—'} грн/л, автогаз — ${data.prices.gas?.toFixed(2) ?? '—'} грн/л. Офіційні дані Мінфіну.`;
 ---
 
-<Layout 
+<Layout
   title={pageTitle}
   description={pageDescription}
   dateStr={data.requestedDate}
@@ -41,18 +44,17 @@ const pageDescription = `Актуальні середні ціни на пал�
 >
   <div class="container">
     <!-- Unified Hero Control Card & Date Selector -->
-    <DatePicker 
-      currentDate={data.requestedDate || data.effectiveDate} 
+    <DatePicker
+      currentDate={data.requestedDate || data.effectiveDate}
       formattedDate={formattedDate}
     />
 
-    {
-      data.hasError && (
-        <div class="error-alert">
-          ⚠️ На жаль, інформація про ціни на пальне на запитану дату ({data.requestedDate}) відсутня або сервіс моніторингу тимчасово недоступний.
-        </div>
-      )
-    }
+    {data.hasError && (
+      <div class="error-alert">
+        ⚠️ На жаль, інформація про ціни на пальне на запитану дату ({data.requestedDate}) відсутня
+        або сервіс моніторингу тимчасово недоступний.
+      </div>
+    )}
 
     <!-- Main Fuel Price Cards with Deltas -->
     <FuelCards prices={data.prices} deltas={data.deltas} unit={data.unit} />
@@ -61,10 +63,10 @@ const pageDescription = `Актуальні середні ціни на пал�
     {data.history && <TrendChart history={data.history} formattedDate={formattedDate} />}
 
     <!-- Share Bar -->
-    <ShareBar 
-      dateStr={data.requestedDate} 
-      effectiveDateStr={data.effectiveDate} 
-      prices={data.prices} 
+    <ShareBar
+      dateStr={data.requestedDate}
+      effectiveDateStr={data.effectiveDate}
+      prices={data.prices}
     />
 
     <!-- Calculators Section -->
@@ -80,19 +82,22 @@ const pageDescription = `Актуальні середні ціни на пал�
         <div class="faq-item">
           <h3>Звідки беруться ціни на пальне?</h3>
           <p>
-            Дані базуються на щоденному моніторингу середньозважених роздрібних цін мереж АЗС України, який веде портал Міністерства фінансів (index.minfin.com.ua).
+            Дані базуються на щоденному моніторингу середньозважених роздрібних цін мереж АЗС
+            України, який веде портал Міністерства фінансів (index.minfin.com.ua).
           </p>
         </div>
         <div class="faq-item">
           <h3>Чи враховані персональні знижки мереж (ОККО, WOG тощо)?</h3>
           <p>
-            Ні, сервіс відображає ціни на стелі АЗС. За програмами лояльності або додатками мереж реальна вартість заправки може бути на 2–5 грн/л нижчою.
+            Ні, сервіс відображає ціни на стелі АЗС. За програмами лояльності або додатками мереж
+            реальна вартість заправки може бути на 2–5 грн/л нижчою.
           </p>
         </div>
         <div class="faq-item">
           <h3>Чому ціни можуть не змінюватися кілька днів?</h3>
           <p>
-            У вихідні та святкові дні оптові трейдери та біржі не оновлюють котирування, тому на суботу-неділю зазвичай діють зафіксовані п'ятничні ціни.
+            У вихідні та святкові дні оптові трейдери та біржі не оновлюють котирування, тому на
+            суботу-неділю зазвичай діють зафіксовані п'ятничні ціни.
           </p>
         </div>
       </div>
@@ -156,5 +161,4 @@ const pageDescription = `Актуальні середні ціни на пал�
     color: var(--text-secondary);
     line-height: 1.5;
   }
-
 </style>

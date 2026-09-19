@@ -31,8 +31,18 @@ export function getPreviousDateISO(dateStr: string): string {
 
 // Українські назви місяців у родовому відмінку
 const MONTHS_UK_GENITIVE = [
-  'січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
-  'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня'
+  'січня',
+  'лютого',
+  'березня',
+  'квітня',
+  'травня',
+  'червня',
+  'липня',
+  'серпня',
+  'вересня',
+  'жовтня',
+  'листопада',
+  'грудня'
 ];
 
 export function formatDateUkrainian(dateStr: string): string {
@@ -68,8 +78,12 @@ export function calculateDeltas(current: FuelPrices, previous: FuelPrices): Fuel
  * Отримання історії цін з API (`GET /fuel/history?endDate=...&days=30`)
  * Максимум 30 днів за вимогою бекенд-контракту.
  */
-export async function fetchFuelHistory(endDateStr?: string, days = 30): Promise<FuelHistoryResponse> {
-  const targetEndDate = endDateStr && isValidDateFormat(endDateStr) ? endDateStr : formatDateISO(new Date());
+export async function fetchFuelHistory(
+  endDateStr?: string,
+  days = 30
+): Promise<FuelHistoryResponse> {
+  const targetEndDate =
+    endDateStr && isValidDateFormat(endDateStr) ? endDateStr : formatDateISO(new Date());
   const validDays = Math.min(Math.max(1, days), 30); // Обмеження 1..30 днів
 
   const url = `${BASE_API_URL}/history?endDate=${targetEndDate}&days=${validDays}`;
@@ -77,7 +91,7 @@ export async function fetchFuelHistory(endDateStr?: string, days = 30): Promise<
   try {
     const res = await fetch(url, {
       headers: {
-        'Accept': 'application/json'
+        Accept: 'application/json'
       }
     });
 
@@ -109,7 +123,7 @@ async function fetchSingleDatePrices(targetDate: string): Promise<FuelApiRespons
   try {
     const res = await fetch(url, {
       headers: {
-        'Accept': 'application/json'
+        Accept: 'application/json'
       }
     });
 
@@ -120,7 +134,7 @@ async function fetchSingleDatePrices(targetDate: string): Promise<FuelApiRespons
     const data = await res.json();
     // Нормалізація date / requestedDate / effectiveDate з відповіді API
     const effectiveDate = data.date || data.effectiveDate || targetDate;
-    
+
     return {
       ...data,
       requestedDate: targetDate,
@@ -166,11 +180,13 @@ export function formatHistoryItemsToPoints(items: FuelHistoryItem[]): FuelHistor
  */
 export async function fetchFuelPrices(dateStr?: string): Promise<FuelApiResponse> {
   const targetDate = dateStr && isValidDateFormat(dateStr) ? dateStr : formatDateISO(new Date());
-  
+
   // 1. Отримуємо дані з API за вказану дату
   const currentData = await fetchSingleDatePrices(targetDate);
-  
-  const hasCurrentPrices = Object.values(currentData.prices).some(v => typeof v === 'number' && v > 0);
+
+  const hasCurrentPrices = Object.values(currentData.prices).some(
+    (v) => typeof v === 'number' && v > 0
+  );
 
   if (currentData.hasError || !hasCurrentPrices) {
     return {

@@ -2,10 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   formatDateISO,
   isValidDateFormat,
-  formatDateUkrainian,
   getPreviousDateISO,
   calculateDeltas,
-  generateHistoryMock,
   fetchFuelPrices,
   fetchFuelHistory,
   formatHistoryItemsToPoints
@@ -47,12 +45,12 @@ describe('fuelApi service', () => {
 
   describe('calculateDeltas', () => {
     it('should calculate difference between current and previous prices', () => {
-      const current = { a95: 57.00, diesel: 55.50, gas: 37.10 };
-      const previous = { a95: 56.60, diesel: 55.80, gas: 37.10 };
+      const current = { a95: 57.0, diesel: 55.5, gas: 37.1 };
+      const previous = { a95: 56.6, diesel: 55.8, gas: 37.1 };
 
       const deltas = calculateDeltas(current, previous);
-      expect(deltas.a95).toBe(0.40);
-      expect(deltas.diesel).toBe(-0.30);
+      expect(deltas.a95).toBe(0.4);
+      expect(deltas.diesel).toBe(-0.3);
       expect(deltas.gas).toBe(0);
     });
   });
@@ -107,10 +105,7 @@ describe('fuelApi service', () => {
       } as Response);
 
       await fetchFuelHistory('2026-09-18', 50);
-      expect(fetch).toHaveBeenCalledWith(
-        expect.stringContaining('days=30'),
-        expect.anything()
-      );
+      expect(fetch).toHaveBeenCalledWith(expect.stringContaining('days=30'), expect.anything());
     });
   });
 
@@ -124,9 +119,9 @@ describe('fuelApi service', () => {
         date: '2026-09-04',
         prices: {
           a95Premium: 85.17,
-          a95: 82.00,
+          a95: 82.0,
           a92: 77.86,
-          diesel: 92.40,
+          diesel: 92.4,
           gas: 43.38
         },
         delta: {
@@ -148,7 +143,7 @@ describe('fuelApi service', () => {
 
       const result = await fetchFuelPrices('2026-09-04');
       expect(result.requestedDate).toBe('2026-09-04');
-      expect(result.prices.a95).toBe(82.00);
+      expect(result.prices.a95).toBe(82.0);
       expect(result.deltas?.a95).toBe(1.68);
       expect(result.delta?.a95Premium).toBe(1.14);
     });

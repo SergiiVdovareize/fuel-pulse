@@ -64,7 +64,11 @@ describe('WebMCP Module', () => {
 
   it('calculate_trip_cost tool handler should calculate trip expenses', async () => {
     const tool = webMcpTools.find((t) => t.name === 'calculate_trip_cost')!;
-    const result = await tool.handler({ distanceKm: 200, consumptionPer100km: 10, fuelType: 'gas' });
+    const result = await tool.handler({
+      distanceKm: 200,
+      consumptionPer100km: 10,
+      fuelType: 'gas'
+    });
 
     expect(result.distanceKm).toBe(200);
     expect(result.fuelNeededLiters).toBe(20);

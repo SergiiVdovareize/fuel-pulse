@@ -34,7 +34,10 @@ const FUEL_KEY_MAP: Record<string, keyof FuelPrices> = {
 /**
  * Отримує ціну за літр для обраного типу пального
  */
-async function getPriceForType(fuelType?: string, customPrice?: number): Promise<{ price: number; type: string }> {
+async function getPriceForType(
+  fuelType?: string,
+  customPrice?: number
+): Promise<{ price: number; type: string }> {
   if (typeof customPrice === 'number' && customPrice > 0) {
     return { price: customPrice, type: fuelType || 'custom' };
   }
@@ -50,13 +53,15 @@ async function getPriceForType(fuelType?: string, customPrice?: number): Promise
 export const webMcpTools: WebMCPTool[] = [
   {
     name: 'get_fuel_prices',
-    description: 'Отримати поточні або історичні середні ціни на пальне в Україні (А-95+, А-95, А-92, Дизель, Автогаз) за вказану дату.',
+    description:
+      'Отримати поточні або історичні середні ціни на пальне в Україні (А-95+, А-95, А-92, Дизель, Автогаз) за вказану дату.',
     inputSchema: {
       type: 'object',
       properties: {
         date: {
           type: 'string',
-          description: 'Дата у форматі YYYY-MM-DD (наприклад, 2026-09-19). Якщо не вказано — повертає останні актуальні ціни.'
+          description:
+            'Дата у форматі YYYY-MM-DD (наприклад, 2026-09-19). Якщо не вказано — повертає останні актуальні ціни.'
         }
       }
     },
@@ -71,7 +76,7 @@ export const webMcpTools: WebMCPTool[] = [
           'A-95': data.prices.a95 ?? null,
           'A-92': data.prices.a92 ?? null,
           'Дизельне пальне': data.prices.diesel ?? null,
-          'Автогаз': data.prices.gas ?? null
+          Автогаз: data.prices.gas ?? null
         },
         deltas: data.delta || {}
       };
@@ -79,27 +84,34 @@ export const webMcpTools: WebMCPTool[] = [
   },
   {
     name: 'calculate_full_tank',
-    description: 'Розрахувати загальну вартість заправки повного бака за об\'ємом (літри) та типом пального або власною ціною за літр.',
+    description:
+      "Розрахувати загальну вартість заправки повного бака за об'ємом (літри) та типом пального або власною ціною за літр.",
     inputSchema: {
       type: 'object',
       properties: {
         tankVolumeLiters: {
           type: 'number',
-          description: 'Об\'єм паливного бака в літрах (наприклад, 50)'
+          description: "Об'єм паливного бака в літрах (наприклад, 50)"
         },
         fuelType: {
           type: 'string',
           enum: ['a95p', 'a95', 'a92', 'dp', 'gas'],
-          description: 'Тип пального: a95p (А-95+), a95 (А-95), a92 (А-92), dp (Дизель), gas (Автогаз). За замовчуванням a95.'
+          description:
+            'Тип пального: a95p (А-95+), a95 (А-95), a92 (А-92), dp (Дизель), gas (Автогаз). За замовчуванням a95.'
         },
         pricePerLiter: {
           type: 'number',
-          description: 'Власна ціна за літр у гривнях (необов\'язково, за замовчуванням використовується актуальна ринкова ціна).'
+          description:
+            "Власна ціна за літр у гривнях (необов'язково, за замовчуванням використовується актуальна ринкова ціна)."
         }
       },
       required: ['tankVolumeLiters']
     },
-    handler: async (params: { tankVolumeLiters: number; fuelType?: string; pricePerLiter?: number }) => {
+    handler: async (params: {
+      tankVolumeLiters: number;
+      fuelType?: string;
+      pricePerLiter?: number;
+    }) => {
       const liters = Number(params.tankVolumeLiters) || 0;
       const { price, type } = await getPriceForType(params.fuelType, params.pricePerLiter);
       const totalCost = calculateTankCost(liters, price);
@@ -115,7 +127,8 @@ export const webMcpTools: WebMCPTool[] = [
   },
   {
     name: 'calculate_trip_cost',
-    description: 'Розрахувати необхідний об\'єм пального та підсумкову вартість поїздки за відстанню (км) і середньою витратою (л/100км).',
+    description:
+      "Розрахувати необхідний об'єм пального та підсумкову вартість поїздки за відстанню (км) і середньою витратою (л/100км).",
     inputSchema: {
       type: 'object',
       properties: {
@@ -134,7 +147,7 @@ export const webMcpTools: WebMCPTool[] = [
         },
         pricePerLiter: {
           type: 'number',
-          description: 'Власна ціна за літр (необов\'язково)'
+          description: "Власна ціна за літр (необов'язково)"
         }
       },
       required: ['distanceKm', 'consumptionPer100km']

@@ -1,9 +1,11 @@
 # Feature Spec: Fuel Price Trends, Deltas & Calculator Testing
 
 ## Overview
+
 This feature introduces price delta indicators (day-over-day price comparison), an interactive 7/30-day fuel price trend chart, pure utility functions for fuel calculators, and automated unit test coverage using Vitest.
 
 ## Acceptance Criteria
+
 1. **Price Deltas**:
    - Each fuel card displays the price change compared to the previous day (e.g., `+0.35 грн` in red badge, `-0.15 грн` in green badge, `0.00 грн` neutral).
    - If previous day data is unavailable, delta is omitted or shown as neutral.

@@ -10,17 +10,17 @@ const MOCK_PRICES_RESPONSE = {
   currency: 'UAH',
   unit: 'грн/л',
   prices: {
-    a95Premium: 61.50,
-    a95: 58.20,
-    a92: 55.10,
-    diesel: 58.00,
-    gas: 33.40
+    a95Premium: 61.5,
+    a95: 58.2,
+    a92: 55.1,
+    diesel: 58.0,
+    gas: 33.4
   },
   delta: {
-    a95Premium: 0.10,
+    a95Premium: 0.1,
     a95: 0.05,
-    a92: 0.00,
-    diesel: -0.20,
+    a92: 0.0,
+    diesel: -0.2,
     gas: 0.15
   },
   source: 'https://index.minfin.com.ua/ua/markets/fuel/'
@@ -33,13 +33,34 @@ const MOCK_HISTORY_RESPONSE = {
   currency: 'UAH',
   unit: 'грн/л',
   items: [
-    { date: '2026-09-13', prices: { a95Premium: 61.40, a95: 58.10, a92: 55.00, diesel: 58.10, gas: 33.20 } },
-    { date: '2026-09-14', prices: { a95Premium: 61.40, a95: 58.15, a92: 55.00, diesel: 58.10, gas: 33.25 } },
-    { date: '2026-09-15', prices: { a95Premium: 61.45, a95: 58.15, a92: 55.10, diesel: 58.05, gas: 33.30 } },
-    { date: '2026-09-16', prices: { a95Premium: 61.45, a95: 58.20, a92: 55.10, diesel: 58.05, gas: 33.35 } },
-    { date: '2026-09-17', prices: { a95Premium: 61.50, a95: 58.20, a92: 55.10, diesel: 58.00, gas: 33.35 } },
-    { date: '2026-09-18', prices: { a95Premium: 61.50, a95: 58.20, a92: 55.10, diesel: 58.00, gas: 33.40 } },
-    { date: '2026-09-19', prices: { a95Premium: 61.50, a95: 58.20, a92: 55.10, diesel: 58.00, gas: 33.40 } }
+    {
+      date: '2026-09-13',
+      prices: { a95Premium: 61.4, a95: 58.1, a92: 55.0, diesel: 58.1, gas: 33.2 }
+    },
+    {
+      date: '2026-09-14',
+      prices: { a95Premium: 61.4, a95: 58.15, a92: 55.0, diesel: 58.1, gas: 33.25 }
+    },
+    {
+      date: '2026-09-15',
+      prices: { a95Premium: 61.45, a95: 58.15, a92: 55.1, diesel: 58.05, gas: 33.3 }
+    },
+    {
+      date: '2026-09-16',
+      prices: { a95Premium: 61.45, a95: 58.2, a92: 55.1, diesel: 58.05, gas: 33.35 }
+    },
+    {
+      date: '2026-09-17',
+      prices: { a95Premium: 61.5, a95: 58.2, a92: 55.1, diesel: 58.0, gas: 33.35 }
+    },
+    {
+      date: '2026-09-18',
+      prices: { a95Premium: 61.5, a95: 58.2, a92: 55.1, diesel: 58.0, gas: 33.4 }
+    },
+    {
+      date: '2026-09-19',
+      prices: { a95Premium: 61.5, a95: 58.2, a92: 55.1, diesel: 58.0, gas: 33.4 }
+    }
   ],
   source: 'https://index.minfin.com.ua/ua/markets/fuel/'
 };
@@ -73,7 +94,7 @@ test.describe('Visual Regression Tests - Fixed Mocked Environment', () => {
 
   test('Повний початковий знімок головної сторінки з мокованими цінами', async ({ page }) => {
     await argosScreenshot(page, 'homepage-full', {
-      fullPage: true,
+      fullPage: true
     });
   });
 
@@ -90,7 +111,7 @@ test.describe('Visual Regression Tests - Fixed Mocked Environment', () => {
 
     // Скріншот оновленого стану
     await argosScreenshot(page, 'tank-calculator-65l', {
-      element: tankCard,
+      element: tankCard
     });
   });
 
@@ -110,7 +131,7 @@ test.describe('Visual Regression Tests - Fixed Mocked Environment', () => {
 
     // Скріншот розрахованого стану
     await argosScreenshot(page, 'trip-calculator-custom-route', {
-      element: tripCard,
+      element: tripCard
     });
   });
 
@@ -128,7 +149,7 @@ test.describe('Visual Regression Tests - Fixed Mocked Environment', () => {
 
     // Скріншот графіка 30 днів
     await argosScreenshot(page, 'trend-chart-30d', {
-      element: chartCard,
+      element: chartCard
     });
   });
 
@@ -140,7 +161,7 @@ test.describe('Visual Regression Tests - Fixed Mocked Environment', () => {
     await expect(page).toHaveURL(/\/\d{4}-\d{2}-\d{2}$/);
 
     await argosScreenshot(page, 'homepage-historical-date-preset', {
-      fullPage: true,
+      fullPage: true
     });
   });
 });

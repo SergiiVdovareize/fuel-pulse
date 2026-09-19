@@ -51,29 +51,29 @@ describe('calculators utility', () => {
 
   describe('calculateTodayComparison', () => {
     it('should correctly format cheaper comparison label when past price is lower than today', () => {
-      const result = calculateTodayComparison(52.00, 56.80);
+      const result = calculateTodayComparison(52.0, 56.8);
       expect(result).toBeDefined();
       expect(result?.type).toBe('cheaper');
       expect(result?.text).toBe('📉 на 4.80 грн дешевше, ніж сьогодні');
     });
 
     it('should correctly format expensive comparison label when past price is higher than today', () => {
-      const result = calculateTodayComparison(58.30, 56.80);
+      const result = calculateTodayComparison(58.3, 56.8);
       expect(result).toBeDefined();
       expect(result?.type).toBe('expensive');
       expect(result?.text).toBe('📈 на 1.50 грн дорожче, ніж сьогодні');
     });
 
     it('should correctly format equal comparison label when prices match', () => {
-      const result = calculateTodayComparison(56.80, 56.80);
+      const result = calculateTodayComparison(56.8, 56.8);
       expect(result).toBeDefined();
       expect(result?.type).toBe('equal');
       expect(result?.text).toBe('⚖️ ціна така сама, як і сьогодні');
     });
 
     it('should return null for invalid or missing inputs', () => {
-      expect(calculateTodayComparison(undefined, 56.80)).toBeNull();
-      expect(calculateTodayComparison(52.00, 0)).toBeNull();
+      expect(calculateTodayComparison(undefined, 56.8)).toBeNull();
+      expect(calculateTodayComparison(52.0, 0)).toBeNull();
     });
   });
 });

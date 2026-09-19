@@ -16,10 +16,15 @@ const history30 = history.slice(-30);
 const history7 = history.slice(-7);
 
 // Функція обчислення SVG path для лінійного графіка
-function generateSvgPath(points: FuelHistoryPoint[], key: 'a95' | 'diesel' | 'gas', width = 600, height = 180): { path: string; min: number; max: number } {
+function generateSvgPath(
+  points: FuelHistoryPoint[],
+  key: 'a95' | 'diesel' | 'gas',
+  width = 600,
+  height = 180
+): { path: string; min: number; max: number } {
   if (points.length < 2) return { path: '', min: 0, max: 0 };
 
-  const values = points.map(p => p.prices[key] ?? 0).filter(v => v > 0);
+  const values = points.map((p) => p.prices[key] ?? 0).filter((v) => v > 0);
   if (values.length === 0) return { path: '', min: 0, max: 0 };
 
   const min = Math.floor(Math.min(...values) - 0.5);
@@ -31,12 +36,14 @@ function generateSvgPath(points: FuelHistoryPoint[], key: 'a95' | 'diesel' | 'ga
   const usableW = width - paddingX * 2;
   const usableH = height - paddingY * 2;
 
-  const path = points.map((p, idx) => {
-    const val = p.prices[key] ?? min;
-    const x = paddingX + (idx / (points.length - 1)) * usableW;
-    const y = height - paddingY - ((val - min) / range) * usableH;
-    return `${idx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-  }).join(' ');
+  const path = points
+    .map((p, idx) => {
+      const val = p.prices[key] ?? min;
+      const x = paddingX + (idx / (points.length - 1)) * usableW;
+      const y = height - paddingY - ((val - min) / range) * usableH;
+      return `${idx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+    })
+    .join(' ');
 
   return { path, min, max };
 }
@@ -55,12 +62,17 @@ const pathGas_7 = generateSvgPath(history7, 'gas');
     <div class="header-left">
       <h2 class="chart-title">📊 Динаміка цін на пальне</h2>
       <p class="chart-subtitle">
-        Зміна середньої вартості на А-95, ДП та Автогаз {displayDate ? `(станом на ${displayDate})` : ''}
+        Зміна середньої вартості на А-95, ДП та Автогаз{' '}
+        {displayDate ? `(станом на ${displayDate})` : ''}
       </p>
     </div>
     <div class="chart-toggles" role="tablist">
-      <button class="toggle-btn active" id="btn-7d" role="tab" aria-selected="true">7 днів</button>
-      <button class="toggle-btn" id="btn-30d" role="tab" aria-selected="false">30 днів</button>
+      <button class="toggle-btn active" id="btn-7d" role="tab" aria-selected="true">
+        7 днів
+      </button>
+      <button class="toggle-btn" id="btn-30d" role="tab" aria-selected="false">
+        30 днів
+      </button>
     </div>
   </div>
 
@@ -85,8 +97,8 @@ const pathGas_7 = generateSvgPath(history7, 'gas');
     <svg viewBox="0 0 600 180" class="chart-svg" id="svg-7d">
       <defs>
         <linearGradient id="gradA95" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"/>
-          <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
+          <stop offset="0%" stop-color="#10b981" stop-opacity="0.3" />
+          <stop offset="100%" stop-color="#10b981" stop-opacity="0.0" />
         </linearGradient>
       </defs>
 
@@ -116,10 +128,16 @@ const pathGas_7 = generateSvgPath(history7, 'gas');
   </div>
 
   <div class="dates-axis" id="axis-7d">
-    {history7.map(p => <span>{p.formattedDate}</span>)}
+    {history7.map((p) => (
+      <span>{p.formattedDate}</span>
+    ))}
   </div>
   <div class="dates-axis hidden" id="axis-30d">
-    {history30.filter((_, i) => i % 5 === 0 || i === history30.length - 1).map(p => <span>{p.formattedDate}</span>)}
+    {history30
+      .filter((_, i) => i % 5 === 0 || i === history30.length - 1)
+      .map((p) => (
+        <span>{p.formattedDate}</span>
+      ))}
   </div>
 </section>
 
@@ -232,9 +250,15 @@ const pathGas_7 = generateSvgPath(history7, 'gas');
     border-radius: 50%;
   }
 
-  .legend-a95 { background: #10b981; }
-  .legend-diesel { background: #06b6d4; }
-  .legend-gas { background: #a855f7; }
+  .legend-a95 {
+    background: #10b981;
+  }
+  .legend-diesel {
+    background: #06b6d4;
+  }
+  .legend-gas {
+    background: #a855f7;
+  }
 
   .svg-container {
     width: 100%;
@@ -265,9 +289,15 @@ const pathGas_7 = generateSvgPath(history7, 'gas');
     transition: stroke-dashoffset 0.5s ease;
   }
 
-  .line-a95 { stroke: #10b981; }
-  .line-diesel { stroke: #06b6d4; }
-  .line-gas { stroke: #a855f7; }
+  .line-a95 {
+    stroke: #10b981;
+  }
+  .line-diesel {
+    stroke: #06b6d4;
+  }
+  .line-gas {
+    stroke: #a855f7;
+  }
 
   .dates-axis {
     display: flex;

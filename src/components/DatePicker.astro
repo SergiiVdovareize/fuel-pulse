@@ -34,7 +34,7 @@ const presets = [
   { label: 'Вчора', date: yesterdayISO },
   { label: '7 днів тому', date: weekAgoISO },
   { label: '30 днів тому', date: monthAgoISO },
-  { label: 'Рік тому', date: yearAgoISO },
+  { label: 'Рік тому', date: yearAgoISO }
 ];
 ---
 
@@ -57,10 +57,10 @@ const presets = [
   </div>
 
   <div class="date-picker-bar">
-    <form 
-      class="custom-date-form" 
-      id="date-form" 
-      toolname="get_fuel_prices" 
+    <form
+      class="custom-date-form"
+      id="date-form"
+      toolname="get_fuel_prices"
       tooldescription="Отримати або переглянути ціни на пальне в Україні за обрану дату"
       toolautosubmit
     >
@@ -69,12 +69,12 @@ const presets = [
         <span class="label-text">Змінити дату:</span>
       </label>
       <div class="input-group">
-        <input 
-          type="date" 
-          id="date-input" 
-          name="date" 
-          value={currentDate} 
-          max={todayISO} 
+        <input
+          type="date"
+          id="date-input"
+          name="date"
+          value={currentDate}
+          max={todayISO}
           min="2015-01-01"
           class="date-input"
           toolparamdescription="Дата моніторингу цін у форматі YYYY-MM-DD"
@@ -88,20 +88,15 @@ const presets = [
     <div class="presets-wrapper">
       <span class="presets-label">Швидкий вибір:</span>
       <div class="presets-list">
-        {
-          presets.map((preset) => {
-            const isActive = preset.date === currentDate;
-            const href = preset.date === todayISO ? '/' : `/${preset.date}`;
-            return (
-              <a 
-                href={href} 
-                class={`preset-btn ${isActive ? 'active' : ''}`}
-              >
-                {preset.label}
-              </a>
-            );
-          })
-        }
+        {presets.map((preset) => {
+          const isActive = preset.date === currentDate;
+          const href = preset.date === todayISO ? '/' : `/${preset.date}`;
+          return (
+            <a href={href} class={`preset-btn ${isActive ? 'active' : ''}`}>
+              {preset.label}
+            </a>
+          );
+        })}
       </div>
     </div>
   </div>
@@ -186,9 +181,18 @@ const presets = [
   }
 
   @keyframes loadingProgress {
-    0% { left: -30%; width: 30%; }
-    50% { left: 30%; width: 50%; }
-    100% { left: 100%; width: 30%; }
+    0% {
+      left: -30%;
+      width: 30%;
+    }
+    50% {
+      left: 30%;
+      width: 50%;
+    }
+    100% {
+      left: 100%;
+      width: 30%;
+    }
   }
 
   /* Glass Overlay Loader */
@@ -229,8 +233,12 @@ const presets = [
   }
 
   @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   .loading-text {
@@ -303,7 +311,9 @@ const presets = [
     border-radius: var(--radius-md);
     font-size: 0.9rem;
     outline: none;
-    transition: border-color 0.2s, background 0.2s;
+    transition:
+      border-color 0.2s,
+      background 0.2s;
   }
 
   .date-input:focus {
@@ -378,7 +388,8 @@ const presets = [
       flex-direction: column;
       align-items: stretch;
     }
-    .custom-date-form, .presets-wrapper {
+    .custom-date-form,
+    .presets-wrapper {
       justify-content: center;
     }
   }

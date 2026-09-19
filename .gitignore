@@ -21,8 +21,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Playwright & Argos Test Artifacts
+# Playwright, Argos & Lighthouse Test Artifacts
 test-results/
 playwright-report/
 screenshots/
 .argos/
+.lighthouseci/

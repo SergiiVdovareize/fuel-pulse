@@ -13,64 +13,66 @@ const { prices, deltas, todayPrices, unit } = Astro.props;
 ---
 
 <div class="prices-grid">
-  {
-    FUEL_METAS.map((fuel) => {
-      const price = prices[fuel.key];
-      const isAvailable = typeof price === 'number' && price > 0;
-      const delta = deltas ? deltas[fuel.key] : undefined;
-      const hasDelta = typeof delta === 'number';
-      const isUp = hasDelta && delta! > 0;
-      const isDown = hasDelta && delta! < 0;
+  {FUEL_METAS.map((fuel) => {
+    const price = prices[fuel.key];
+    const isAvailable = typeof price === 'number' && price > 0;
+    const delta = deltas ? deltas[fuel.key] : undefined;
+    const hasDelta = typeof delta === 'number';
+    const isUp = hasDelta && delta! > 0;
+    const isDown = hasDelta && delta! < 0;
 
-      const todayPrice = todayPrices ? todayPrices[fuel.key] : undefined;
-      const hasTodayComp = isAvailable && typeof todayPrice === 'number' && todayPrice > 0;
-      const diffWithToday = hasTodayComp ? Math.round((price - todayPrice!) * 100) / 100 : 0;
-      const absDiff = Math.abs(diffWithToday).toFixed(2);
-      const formattedDiff = diffWithToday > 0 ? `+${absDiff}` : diffWithToday < 0 ? `-${absDiff}` : `0.00`;
+    const todayPrice = todayPrices ? todayPrices[fuel.key] : undefined;
+    const hasTodayComp = isAvailable && typeof todayPrice === 'number' && todayPrice > 0;
+    const diffWithToday = hasTodayComp ? Math.round((price - todayPrice!) * 100) / 100 : 0;
+    const absDiff = Math.abs(diffWithToday).toFixed(2);
+    const formattedDiff =
+      diffWithToday > 0 ? `+${absDiff}` : diffWithToday < 0 ? `-${absDiff}` : `0.00`;
 
-      return (
-        <article class="price-card glass-card" style={`--fuel-accent: ${fuel.badgeColor};`}>
-          <div class="card-header">
-            <div class="header-top">
-              <span class="badge" style={`color: ${fuel.badgeColor}; border-color: ${fuel.badgeColor}33; background: ${fuel.badgeColor}15;`}>
-                {fuel.shortName}
+    return (
+      <article class="price-card glass-card" style={`--fuel-accent: ${fuel.badgeColor};`}>
+        <div class="card-header">
+          <div class="header-top">
+            <span
+              class="badge"
+              style={`color: ${fuel.badgeColor}; border-color: ${fuel.badgeColor}33; background: ${fuel.badgeColor}15;`}
+            >
+              {fuel.shortName}
+            </span>
+            {hasDelta && (
+              <span
+                class={`delta-badge ${isUp ? 'delta-up' : isDown ? 'delta-down' : 'delta-neutral'}`}
+              >
+                {isUp ? `+${delta?.toFixed(2)} ▲` : isDown ? `${delta?.toFixed(2)} ▼` : `0.00`}
               </span>
-              {hasDelta && (
-                <span class={`delta-badge ${isUp ? 'delta-up' : isDown ? 'delta-down' : 'delta-neutral'}`}>
-                  {isUp ? `+${delta?.toFixed(2)} ▲` : isDown ? `${delta?.toFixed(2)} ▼` : `0.00`}
-                </span>
-              )}
-            </div>
-            <span class="fuel-type-label">{fuel.label}</span>
-          </div>
-
-          <div class="card-body">
-            {isAvailable ? (
-              <div class="price-section">
-                <div class="price-wrapper">
-                  <span class="price-number">{price.toFixed(2)}</span>
-                  <span class="price-unit">{unit}</span>
-                </div>
-              </div>
-            ) : (
-              <div class="price-unavailable">
-                <span>Немає даних</span>
-              </div>
             )}
-            <p class="fuel-desc">{fuel.description}</p>
           </div>
+          <span class="fuel-type-label">{fuel.label}</span>
+        </div>
 
-          {isAvailable && hasTodayComp && (
-            <div class="card-footer-bar">
-              <div class="footer-content">
-                {formattedDiff} грн.  до сьогодні
+        <div class="card-body">
+          {isAvailable ? (
+            <div class="price-section">
+              <div class="price-wrapper">
+                <span class="price-number">{price.toFixed(2)}</span>
+                <span class="price-unit">{unit}</span>
               </div>
+            </div>
+          ) : (
+            <div class="price-unavailable">
+              <span>Немає даних</span>
             </div>
           )}
-        </article>
-      );
-    })
-  }
+          <p class="fuel-desc">{fuel.description}</p>
+        </div>
+
+        {isAvailable && hasTodayComp && (
+          <div class="card-footer-bar">
+            <div class="footer-content">{formattedDiff} грн. до сьогодні</div>
+          </div>
+        )}
+      </article>
+    );
+  })}
 </div>
 
 <style>

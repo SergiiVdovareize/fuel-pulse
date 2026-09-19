@@ -13,7 +13,7 @@ const { prices, dateStr, formattedDate: customFormattedDate } = Astro.props;
 const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateStr) : undefined);
 ---
 
-<form 
+<form
   class="trip-card glass-card"
   toolname="calculate_trip_cost"
   tooldescription="Розрахувати витрати пального та підсумкову вартість поїздки за відстанню (км) і середньою витратою (л/100км)"
@@ -25,7 +25,8 @@ const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateSt
     <div>
       <h3 class="trip-title">Калькулятор витрат на поїздку</h3>
       <p class="trip-subtitle">
-        Розрахуйте вартість маршруту {displayDate ? `за цінами на ${displayDate}` : 'за цінами обраної дати'}
+        Розрахуйте вартість маршруту{' '}
+        {displayDate ? `за цінами на ${displayDate}` : 'за цінами обраної дати'}
       </p>
     </div>
   </div>
@@ -33,13 +34,13 @@ const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateSt
   <div class="trip-inputs-grid">
     <div class="input-field">
       <label for="distance-input">Відстань (км):</label>
-      <input 
-        type="number" 
-        id="distance-input" 
+      <input
+        type="number"
+        id="distance-input"
         name="distanceKm"
-        value="100" 
-        min="1" 
-        max="5000" 
+        value="100"
+        min="1"
+        max="5000"
         step="10"
         class="custom-input"
         toolparamdescription="Відстань запланованого маршруту в кілометрах (наприклад, 150)"
@@ -48,13 +49,13 @@ const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateSt
 
     <div class="input-field">
       <label for="consumption-input">Середня витрата (л/100 км):</label>
-      <input 
-        type="number" 
-        id="consumption-input" 
+      <input
+        type="number"
+        id="consumption-input"
         name="consumptionPer100km"
-        value="7.5" 
-        min="1" 
-        max="30" 
+        value="7.5"
+        min="1"
+        max="30"
         step="0.5"
         class="custom-input"
         toolparamdescription="Середня витрата пального автомобілем на 100 км (наприклад, 8.5)"
@@ -63,25 +64,23 @@ const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateSt
 
     <div class="input-field">
       <label for="fuel-select">Вид пального:</label>
-      <select 
-        id="fuel-select" 
+      <select
+        id="fuel-select"
         name="fuelType"
         class="custom-input custom-select"
         toolparamdescription="Обраний тип пального (грн/л)"
       >
-        {
-          FUEL_METAS.map((fuel) => {
-            const price = prices[fuel.key];
-            if (typeof price === 'number' && price > 0) {
-              return (
-                <option value={price} selected={fuel.key === 'a95'}>
-                  {fuel.label} ({price.toFixed(2)} грн/л)
-                </option>
-              );
-            }
-            return null;
-          })
-        }
+        {FUEL_METAS.map((fuel) => {
+          const price = prices[fuel.key];
+          if (typeof price === 'number' && price > 0) {
+            return (
+              <option value={price} selected={fuel.key === 'a95'}>
+                {fuel.label} ({price.toFixed(2)} грн/л)
+              </option>
+            );
+          }
+          return null;
+        })}
       </select>
     </div>
   </div>
@@ -89,12 +88,16 @@ const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateSt
   <div class="trip-result-box">
     <div class="result-metric">
       <span class="metric-label">Потрібно пального:</span>
-      <span class="metric-value" id="liters-needed">7.5 л</span>
+      <span class="metric-value" id="liters-needed">
+        7.5 л
+      </span>
     </div>
     <div class="result-divider"></div>
     <div class="result-metric highlight">
       <span class="metric-label">Орієнтовна вартість поїздки:</span>
-      <span class="metric-value"><strong id="trip-total-sum">426</strong> грн</span>
+      <span class="metric-value">
+        <strong id="trip-total-sum">426</strong> грн
+      </span>
     </div>
   </div>
 </form>
@@ -108,7 +111,8 @@ const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateSt
   const tripTotalSum = document.getElementById('trip-total-sum');
 
   function calculateTrip() {
-    if (!distanceInput || !consumptionInput || !fuelSelect || !litersNeeded || !tripTotalSum) return;
+    if (!distanceInput || !consumptionInput || !fuelSelect || !litersNeeded || !tripTotalSum)
+      return;
 
     const distance = parseFloat(distanceInput.value) || 0;
     const consumption = parseFloat(consumptionInput.value) || 0;

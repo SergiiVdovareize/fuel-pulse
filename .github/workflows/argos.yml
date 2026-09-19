@@ -2,9 +2,9 @@ name: Visual Regression (Argos CI)
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
   visual-test:
@@ -28,7 +28,22 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
+      - name: Run Astro Type Check
+        run: npm run check
+
+      - name: Run Prettier Check
+        run: npm run format:check
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Run Unit Tests
+        run: npm test
+
       - name: Run Playwright Visual Tests
         run: npm run test:e2e
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
+
+      - name: Run Lighthouse CI Audit
+        run: npm run test:lighthouse
