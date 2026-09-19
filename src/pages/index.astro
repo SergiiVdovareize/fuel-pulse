@@ -49,14 +49,6 @@ const pageDescription = `Актуальні середні ціни на пал�
           </div>
         )
       }
-
-      {
-        !data.hasError && data.effectiveDate !== data.requestedDate && (
-          <div class="date-alert">
-            ℹ️ Увага: на запитану дату ({data.requestedDate}) діють показники від {data.effectiveDate} (вихідний або святковий день на біржах).
-          </div>
-        )
-      }
     </section>
 
     <!-- Interactive Date Picker -->

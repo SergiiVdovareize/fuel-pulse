@@ -19,12 +19,16 @@ const shareText = `⛽️ Середні ціни на пальне в Укра�
   (prices.gas ? `• Газ: ${prices.gas.toFixed(2)} грн/л\n` : '') +
   (prices.a92 ? `• А-92: ${prices.a92.toFixed(2)} грн/л\n` : '') +
   `\nДжерело: FuelPulse`;
+
+const currentUrl = Astro.url.href;
+const encodedText = encodeURIComponent(shareText);
+const encodedUrl = encodeURIComponent(currentUrl);
 ---
 
 <div class="share-bar glass-card">
   <div class="share-info">
     <span class="share-icon">📲</span>
-    <span class="share-text">Поділитися зведенням цін у месенджерах:</span>
+    <span class="share-text">Поділитися зведенням цін у месенджерах та соцмережах:</span>
   </div>
 
   <div class="share-actions">
@@ -33,19 +37,65 @@ const shareText = `⛽️ Середні ціни на пальне в Укра�
       class="action-btn copy-btn" 
       id="copy-prices-btn"
       data-text={shareText}
+      title="Скопіювати текст у буфер обміну"
     >
       <span class="btn-icon">📋</span>
-      <span class="btn-label" id="copy-label">Скопіювати зведення</span>
+      <span class="btn-label" id="copy-label">Скопіювати</span>
     </button>
 
     <a 
-      href={`https://t.me/share/url?url=${encodeURIComponent(Astro.url.href)}&text=${encodeURIComponent(shareText)}`}
+      href={`https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`}
       target="_blank" 
       rel="noopener noreferrer" 
       class="action-btn telegram-btn"
+      title="Поділитися у Telegram"
     >
       <span class="btn-icon">✈️</span>
       <span class="btn-label">Telegram</span>
+    </a>
+
+    <a 
+      href={`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + '\n' + currentUrl)}`}
+      target="_blank" 
+      rel="noopener noreferrer" 
+      class="action-btn whatsapp-btn"
+      title="Поділитися у WhatsApp"
+    >
+      <span class="btn-icon">💬</span>
+      <span class="btn-label">WhatsApp</span>
+    </a>
+
+    <a 
+      href={`viber://forward?text=${encodeURIComponent(shareText + '\n' + currentUrl)}`}
+      target="_blank" 
+      rel="noopener noreferrer" 
+      class="action-btn viber-btn"
+      title="Поділитися у Viber"
+    >
+      <span class="btn-icon">🟣</span>
+      <span class="btn-label">Viber</span>
+    </a>
+
+    <a 
+      href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
+      target="_blank" 
+      rel="noopener noreferrer" 
+      class="action-btn facebook-btn"
+      title="Поділитися у Facebook"
+    >
+      <span class="btn-icon">📘</span>
+      <span class="btn-label">Facebook</span>
+    </a>
+
+    <a 
+      href={`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`}
+      target="_blank" 
+      rel="noopener noreferrer" 
+      class="action-btn twitter-btn"
+      title="Поділитися в X (Twitter)"
+    >
+      <span class="btn-icon">🐦</span>
+      <span class="btn-label">X / Twitter</span>
     </a>
   </div>
 </div>
@@ -90,6 +140,7 @@ const shareText = `⛽️ Середні ціни на пальне в Укра�
     gap: 0.5rem;
     font-size: 0.95rem;
     color: var(--text-secondary);
+    font-weight: 500;
   }
 
   .share-icon {
@@ -98,19 +149,23 @@ const shareText = `⛽️ Середні ціни на пальне в Укра�
 
   .share-actions {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
+    align-items: center;
   }
 
   .action-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.5rem 0.9rem;
+    min-height: 44px;
+    padding: 0.5rem 0.85rem;
     border-radius: var(--radius-md);
     font-size: 0.85rem;
     font-weight: 600;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
   }
 
   .copy-btn {
@@ -135,6 +190,56 @@ const shareText = `⛽️ Середні ціни на пальне в Укра�
   }
 
   .telegram-btn:hover {
-    background: rgba(36, 161, 222, 0.25);
+    background: rgba(36, 161, 222, 0.28);
+  }
+
+  .whatsapp-btn {
+    background: rgba(37, 211, 102, 0.15);
+    border: 1px solid rgba(37, 211, 102, 0.3);
+    color: #25d366;
+  }
+
+  .whatsapp-btn:hover {
+    background: rgba(37, 211, 102, 0.28);
+  }
+
+  .viber-btn {
+    background: rgba(115, 96, 242, 0.15);
+    border: 1px solid rgba(115, 96, 242, 0.3);
+    color: #a394f9;
+  }
+
+  .viber-btn:hover {
+    background: rgba(115, 96, 242, 0.28);
+  }
+
+  .facebook-btn {
+    background: rgba(24, 119, 242, 0.15);
+    border: 1px solid rgba(24, 119, 242, 0.3);
+    color: #1877f2;
+  }
+
+  .facebook-btn:hover {
+    background: rgba(24, 119, 242, 0.28);
+  }
+
+  .twitter-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e2e8f0;
+  }
+
+  .twitter-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  @media (max-width: 640px) {
+    .share-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .share-actions {
+      justify-content: flex-start;
+    }
   }
 </style>

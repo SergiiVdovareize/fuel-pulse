@@ -56,14 +56,6 @@ const pageDescription = `Середня ціна пального в Украї�
           </div>
         )
       }
-
-      {
-        !data.hasError && data.effectiveDate !== data.requestedDate && (
-          <div class="date-alert">
-            ℹ️ На запитану дату ({data.requestedDate}) діяли ціни від {data.effectiveDate} (вихідний або святковий день).
-          </div>
-        )
-      }
     </section>
 
     <!-- Interactive Date Picker -->
