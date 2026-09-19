@@ -11,8 +11,7 @@ import { fetchFuelPrices, formatDateUkrainian, formatDateISO } from '../services
 // Отримуємо поточні ціни на пальне
 const todayISO = formatDateISO(new Date());
 const data = await fetchFuelPrices(todayISO);
-const formattedDate = formatDateUkrainian(data.effectiveDate);
-
+const formattedDate = formatDateUkrainian(data.requestedDate || data.effectiveDate);
 const pageTitle = `Ціни на пальне в Україні на ${formattedDate} — А-95, Дизель, Газ | FuelPulse`;
 const pageDescription = `Актуальні середні ціни на пальне в Україні станом на ${formattedDate}: бензин А-95 — ${data.prices.a95?.toFixed(2) ?? '—'} грн/л, дизель — ${data.prices.diesel?.toFixed(2) ?? '—'} грн/л, автогаз — ${data.prices.gas?.toFixed(2) ?? '—'} грн/л. Офіційні дані Мінфіну.`;
 ---
@@ -25,40 +24,25 @@ const pageDescription = `Актуальні середні ціни на пал�
   prices={data.prices}
 >
   <div class="container">
-    <!-- Hero Section -->
-    <section class="hero-section">
-      <div class={`hero-badge ${data.hasError ? 'error-badge' : ''}`}>
-        <span class="pulse-indicator"></span>
-        <span>
-          {data.hasError ? 'Дані відсутні' : 'Оновлено сьогодні'}
-        </span>
-      </div>
+    <!-- Unified Hero Control Card & Date Selector -->
+    <DatePicker 
+      currentDate={data.requestedDate || data.effectiveDate} 
+      formattedDate={formattedDate}
+    />
 
-      <h1 class="hero-title">
-        Середні ціни на пальне в Україні на <span class="hero-date">{formattedDate}</span>
-      </h1>
-
-      <p class="hero-subtitle">
-        Офіційний моніторинг вартості нафтопродуктів та автогазу. Розраховуйте вартість заправки бака та плануйте бюджет поїздок.
-      </p>
-
-      {
-        data.hasError && (
-          <div class="error-alert">
-            ⚠️ На жаль, інформація про ціни на пальне на запитану дату ({data.requestedDate}) відсутня або сервіс моніторингу тимчасово недоступний.
-          </div>
-        )
-      }
-    </section>
-
-    <!-- Interactive Date Picker -->
-    <DatePicker currentDate={data.effectiveDate} />
+    {
+      data.hasError && (
+        <div class="error-alert">
+          ⚠️ На жаль, інформація про ціни на пальне на запитану дату ({data.requestedDate}) відсутня або сервіс моніторингу тимчасово недоступний.
+        </div>
+      )
+    }
 
     <!-- Main Fuel Price Cards with Deltas -->
     <FuelCards prices={data.prices} deltas={data.deltas} unit={data.unit} />
 
     <!-- 7/30-Day Trend Chart -->
-    {data.history && <TrendChart history={data.history} />}
+    {data.history && <TrendChart history={data.history} formattedDate={formattedDate} />}
 
     <!-- Share Bar -->
     <ShareBar 
@@ -69,8 +53,8 @@ const pageDescription = `Актуальні середні ціни на пал�
 
     <!-- Calculators Section -->
     <section class="tools-section">
-      <TankCalculator prices={data.prices} unit={data.unit} />
-      <TripCalculator prices={data.prices} />
+      <TankCalculator prices={data.prices} unit={data.unit} formattedDate={formattedDate} />
+      <TripCalculator prices={data.prices} formattedDate={formattedDate} />
     </section>
 
     <!-- SEO FAQ Section -->
@@ -101,51 +85,6 @@ const pageDescription = `Актуальні середні ціни на пал�
 </Layout>
 
 <style>
-  .hero-section {
-    text-align: center;
-    max-width: 820px;
-    margin: 0 auto 2.5rem;
-  }
-
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.85rem;
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    border-radius: var(--radius-full);
-    font-size: 0.8rem;
-    color: var(--accent-emerald);
-    font-weight: 600;
-    margin-bottom: 1.25rem;
-  }
-
-  .pulse-indicator {
-    width: 6px;
-    height: 6px;
-    background: var(--accent-emerald);
-    border-radius: 50%;
-  }
-
-  .hero-title {
-    font-size: 2.3rem;
-    font-weight: 800;
-    line-height: 1.25;
-    letter-spacing: -0.03em;
-    margin-bottom: 1rem;
-  }
-
-  .hero-date {
-    color: var(--accent-emerald);
-  }
-
-  .hero-subtitle {
-    font-size: 1.05rem;
-    color: var(--text-secondary);
-    line-height: 1.5;
-  }
-
   .date-alert {
     margin-top: 1rem;
     padding: 0.6rem 1rem;
@@ -165,16 +104,6 @@ const pageDescription = `Актуальні середні ціни на пал�
     color: #f87171;
     font-size: 0.9rem;
     font-weight: 500;
-  }
-
-  .error-badge {
-    background: rgba(239, 68, 68, 0.1) !important;
-    border-color: rgba(239, 68, 68, 0.3) !important;
-    color: #f87171 !important;
-  }
-
-  .error-badge .pulse-indicator {
-    background: #ef4444 !important;
   }
 
   .tools-section {
@@ -212,12 +141,4 @@ const pageDescription = `Актуальні середні ціни на пал�
     line-height: 1.5;
   }
 
-  @media (max-width: 640px) {
-    .hero-title {
-      font-size: 1.7rem;
-    }
-    .hero-subtitle {
-      font-size: 0.95rem;
-    }
-  }
 </style>

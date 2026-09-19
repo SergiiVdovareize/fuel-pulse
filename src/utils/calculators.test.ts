@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateTankCost, calculateTripCost } from './calculators';
+import { calculateTankCost, calculateTripCost, calculateTodayComparison } from './calculators';
 
 describe('calculators utility', () => {
   describe('calculateTankCost', () => {
@@ -23,7 +23,6 @@ describe('calculators utility', () => {
 
   describe('calculateTripCost', () => {
     it('should calculate fuel needed, total cost, and cost per km for a trip', () => {
-      // 500 km, 8 L/100km, 56.81 UAH/L => 40 liters => 2272.4 UAH => 4.54 UAH/km
       const result = calculateTripCost(500, 8, 56.81);
       expect(result.fuelNeededLiters).toBe(40);
       expect(result.totalCost).toBe(2272.4);
@@ -32,8 +31,6 @@ describe('calculators utility', () => {
 
     it('should handle fractional values correctly', () => {
       const result = calculateTripCost(150, 6.5, 55.22);
-      // 150 * 6.5 / 100 = 9.75 liters
-      // 9.75 * 55.22 = 538.395 => 538.4
       expect(result.fuelNeededLiters).toBe(9.75);
       expect(result.totalCost).toBe(538.4);
     });
@@ -49,6 +46,34 @@ describe('calculators utility', () => {
         fuelNeededLiters: 0,
         costPerKm: 0
       });
+    });
+  });
+
+  describe('calculateTodayComparison', () => {
+    it('should correctly format cheaper comparison label when past price is lower than today', () => {
+      const result = calculateTodayComparison(52.00, 56.80);
+      expect(result).toBeDefined();
+      expect(result?.type).toBe('cheaper');
+      expect(result?.text).toBe('📉 на 4.80 грн дешевше, ніж сьогодні');
+    });
+
+    it('should correctly format expensive comparison label when past price is higher than today', () => {
+      const result = calculateTodayComparison(58.30, 56.80);
+      expect(result).toBeDefined();
+      expect(result?.type).toBe('expensive');
+      expect(result?.text).toBe('📈 на 1.50 грн дорожче, ніж сьогодні');
+    });
+
+    it('should correctly format equal comparison label when prices match', () => {
+      const result = calculateTodayComparison(56.80, 56.80);
+      expect(result).toBeDefined();
+      expect(result?.type).toBe('equal');
+      expect(result?.text).toBe('⚖️ ціна така сама, як і сьогодні');
+    });
+
+    it('should return null for invalid or missing inputs', () => {
+      expect(calculateTodayComparison(undefined, 56.80)).toBeNull();
+      expect(calculateTodayComparison(52.00, 0)).toBeNull();
     });
   });
 });

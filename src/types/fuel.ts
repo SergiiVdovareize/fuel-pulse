@@ -25,6 +25,7 @@ export interface FuelHistoryPoint {
 export interface FuelHistoryItem {
   date: string;
   prices: FuelPrices;
+  delta?: FuelDeltas;
 }
 
 export interface FuelHistoryResponse {
@@ -45,6 +46,7 @@ export interface FuelApiResponse {
   currency: string;
   unit: string;
   prices: FuelPrices;
+  delta?: FuelDeltas;
   deltas?: FuelDeltas;
   history?: FuelHistoryPoint[];
   source: string;

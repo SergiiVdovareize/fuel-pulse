@@ -1,11 +1,15 @@
 ---
 import type { FuelHistoryPoint } from '../types/fuel';
+import { formatDateUkrainian } from '../services/fuelApi';
 
 interface Props {
   history: FuelHistoryPoint[];
+  dateStr?: string;
+  formattedDate?: string;
 }
 
-const { history = [] } = Astro.props;
+const { history = [], dateStr, formattedDate: customFormattedDate } = Astro.props;
+const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateStr) : undefined);
 
 // Готуємо дані для 7 та 30 днів
 const history30 = history.slice(-30);
@@ -50,7 +54,9 @@ const pathGas_7 = generateSvgPath(history7, 'gas');
   <div class="chart-header">
     <div class="header-left">
       <h2 class="chart-title">📊 Динаміка цін на пальне</h2>
-      <p class="chart-subtitle">Зміна середньої вартості на А-95, ДП та Автогаз</p>
+      <p class="chart-subtitle">
+        Зміна середньої вартості на А-95, ДП та Автогаз {displayDate ? `(станом на ${displayDate})` : ''}
+      </p>
     </div>
     <div class="chart-toggles" role="tablist">
       <button class="toggle-btn active" id="btn-7d" role="tab" aria-selected="true">7 днів</button>

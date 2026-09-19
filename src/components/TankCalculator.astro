@@ -1,13 +1,17 @@
 ---
 import type { FuelPrices } from '../types/fuel';
 import { FUEL_METAS } from '../types/fuel';
+import { formatDateUkrainian } from '../services/fuelApi';
 
 interface Props {
   prices: FuelPrices;
   unit: string;
+  dateStr?: string;
+  formattedDate?: string;
 }
 
-const { prices, unit } = Astro.props;
+const { prices, unit, dateStr, formattedDate: customFormattedDate } = Astro.props;
+const displayDate = customFormattedDate || (dateStr ? formatDateUkrainian(dateStr) : undefined);
 ---
 
 <div class="calculator-card glass-card">
@@ -15,7 +19,9 @@ const { prices, unit } = Astro.props;
     <div class="calc-icon">🔋</div>
     <div>
       <h3 class="calc-title">Калькулятор повного бака</h3>
-      <p class="calc-subtitle">Скільки коштуватиме заправити бак на обрану дату</p>
+      <p class="calc-subtitle">
+        Скільки коштуватиме заправити бак {displayDate ? `за цінами на ${displayDate}` : 'на обрану дату'}
+      </p>
     </div>
   </div>
 

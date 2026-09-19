@@ -1,5 +1,5 @@
 /**
- * Utilities for fuel tank and trip calculations
+ * Utilities for fuel tank, trip calculations, and today's price comparisons
  */
 
 export interface TankCalculationResult {
@@ -12,6 +12,12 @@ export interface TripCalculationResult {
   totalCost: number;
   fuelNeededLiters: number;
   costPerKm: number;
+}
+
+export interface TodayComparisonResult {
+  diff: number;
+  type: 'cheaper' | 'expensive' | 'equal';
+  text: string;
 }
 
 /**
@@ -57,4 +63,43 @@ export function calculateTripCost(
     fuelNeededLiters: Math.round(fuelNeededLiters * 100) / 100,
     costPerKm: Math.round(costPerKm * 100) / 100
   };
+}
+
+/**
+ * Compares a historical price with today's price (Variant A).
+ */
+export function calculateTodayComparison(pastPrice?: number, todayPrice?: number): TodayComparisonResult | null {
+  if (
+    typeof pastPrice !== 'number' ||
+    typeof todayPrice !== 'number' ||
+    pastPrice <= 0 ||
+    todayPrice <= 0 ||
+    isNaN(pastPrice) ||
+    isNaN(todayPrice)
+  ) {
+    return null;
+  }
+
+  const diff = Math.round((pastPrice - todayPrice) * 100) / 100;
+  const absDiff = Math.abs(diff).toFixed(2);
+
+  if (diff < 0) {
+    return {
+      diff,
+      type: 'cheaper',
+      text: `📉 на ${absDiff} грн дешевше, ніж сьогодні`
+    };
+  } else if (diff > 0) {
+    return {
+      diff,
+      type: 'expensive',
+      text: `📈 на ${absDiff} грн дорожче, ніж сьогодні`
+    };
+  } else {
+    return {
+      diff: 0,
+      type: 'equal',
+      text: `⚖️ ціна така сама, як і сьогодні`
+    };
+  }
 }

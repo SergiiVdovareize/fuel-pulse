@@ -46,7 +46,7 @@ export function formatDateUkrainian(dateStr: string): string {
 }
 
 /**
- * Обчислення різниці між цінами сьогодні та попереднього дня
+ * Резервне обчислення різниці (якщо API повернув ціни без поля delta)
  */
 export function calculateDeltas(current: FuelPrices, previous: FuelPrices): FuelDeltas {
   const keys: (keyof FuelPrices)[] = ['a95Premium', 'a95', 'a92', 'diesel', 'dieselPremium', 'gas'];
@@ -88,7 +88,6 @@ export async function fetchFuelHistory(endDateStr?: string, days = 30): Promise<
     return await res.json();
   } catch (error) {
     console.error(`[fetchFuelHistory] Failed to fetch history for ${targetEndDate}:`, error);
-    // При помилці або відсутності ендпоінта повертаємо порожню структуру відповідно до контракту
     return {
       startDate: targetEndDate,
       endDate: targetEndDate,
@@ -118,7 +117,15 @@ async function fetchSingleDatePrices(targetDate: string): Promise<FuelApiRespons
       throw new Error(`API error: status ${res.status}`);
     }
 
-    return await res.json();
+    const data = await res.json();
+    // Нормалізація date / requestedDate / effectiveDate з відповіді API
+    const effectiveDate = data.date || data.effectiveDate || targetDate;
+    
+    return {
+      ...data,
+      requestedDate: targetDate,
+      effectiveDate
+    };
   } catch (error) {
     console.error(`[fetchSingleDatePrices] Failed to fetch for date ${targetDate}:`, error);
     return {
@@ -155,12 +162,12 @@ export function formatHistoryItemsToPoints(items: FuelHistoryItem[]): FuelHistor
 }
 
 /**
- * Отримання цін на пальне на задану дату разом з дельтами та історією
+ * Отримання цін на пальне на задану дату з РЕАЛЬНОЮ дельтою з API
  */
 export async function fetchFuelPrices(dateStr?: string): Promise<FuelApiResponse> {
   const targetDate = dateStr && isValidDateFormat(dateStr) ? dateStr : formatDateISO(new Date());
   
-  // 1. Отримуємо ціни на обрану дату з API
+  // 1. Отримуємо дані з API за вказану дату
   const currentData = await fetchSingleDatePrices(targetDate);
   
   const hasCurrentPrices = Object.values(currentData.prices).some(v => typeof v === 'number' && v > 0);
@@ -168,34 +175,37 @@ export async function fetchFuelPrices(dateStr?: string): Promise<FuelApiResponse
   if (currentData.hasError || !hasCurrentPrices) {
     return {
       ...currentData,
+      delta: {},
       deltas: {},
       history: []
     };
   }
 
-  // 2. Спроба отримати реальну історію за останні 30 днів через новий ендпоінт GET /fuel/history
+  // 2. ПРЯМЕ використання дельти від API (з поля delta або deltas)
+  let deltas: FuelDeltas = currentData.delta || currentData.deltas || {};
+
+  // 3. Отримуємо історію для побудови графіка
   const historyResponse = await fetchFuelHistory(currentData.effectiveDate, 30);
-  
   let historyPoints: FuelHistoryPoint[] = [];
-  let deltas: FuelDeltas = {};
 
   if (historyResponse.items && historyResponse.items.length > 0) {
     historyPoints = formatHistoryItemsToPoints(historyResponse.items);
-    // Обчислюємо дельту з передостаннього запису в масиві items
-    if (historyResponse.items.length >= 2) {
+
+    // Якщо в окремому запиті дельта була відсутня, витягуємо її з останнього елемента історії
+    if (Object.keys(deltas).length === 0) {
       const lastItem = historyResponse.items[historyResponse.items.length - 1];
-      const prevItem = historyResponse.items[historyResponse.items.length - 2];
-      deltas = calculateDeltas(lastItem.prices, prevItem.prices);
+      if (lastItem.delta) {
+        deltas = lastItem.delta;
+      } else if (historyResponse.items.length >= 2) {
+        const prevItem = historyResponse.items[historyResponse.items.length - 2];
+        deltas = calculateDeltas(lastItem.prices, prevItem.prices);
+      }
     }
-  } else {
-    // Якщо ендпоінт /fuel/history ще не повернув даних, отримуємо ціни на попередній день напряму
-    const prevDateStr = getPreviousDateISO(currentData.effectiveDate);
-    const prevData = await fetchSingleDatePrices(prevDateStr);
-    deltas = calculateDeltas(currentData.prices, prevData.prices);
   }
 
   return {
     ...currentData,
+    delta: deltas,
     deltas,
     history: historyPoints
   };

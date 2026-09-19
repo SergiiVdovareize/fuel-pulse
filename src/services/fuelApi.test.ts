@@ -119,19 +119,25 @@ describe('fuelApi service', () => {
       vi.restoreAllMocks();
     });
 
-    it('should fetch prices and return history + deltas', async () => {
+    it('should fetch prices and use API-provided delta directly', async () => {
       const mockSingleData = {
-        requestedDate: '2026-09-18',
-        effectiveDate: '2026-09-18',
+        date: '2026-09-04',
+        prices: {
+          a95Premium: 85.17,
+          a95: 82.00,
+          a92: 77.86,
+          diesel: 92.40,
+          gas: 43.38
+        },
+        delta: {
+          a95Premium: 1.14,
+          a95: 1.68,
+          a92: 0.99,
+          diesel: 0.99,
+          gas: 0.32
+        },
         currency: 'UAH',
         unit: 'грн/л',
-        prices: {
-          a95Premium: 60.5,
-          a95: 57.0,
-          a92: 54.0,
-          diesel: 56.0,
-          gas: 38.0
-        },
         source: 'https://api.vdovareize.me/fuel'
       };
 
@@ -140,9 +146,11 @@ describe('fuelApi service', () => {
         json: async () => mockSingleData
       } as Response);
 
-      const result = await fetchFuelPrices('2026-09-18');
-      expect(result.requestedDate).toBe('2026-09-18');
-      expect(result.prices.a95).toBe(57.0);
+      const result = await fetchFuelPrices('2026-09-04');
+      expect(result.requestedDate).toBe('2026-09-04');
+      expect(result.prices.a95).toBe(82.00);
+      expect(result.deltas?.a95).toBe(1.68);
+      expect(result.delta?.a95Premium).toBe(1.14);
     });
 
     it('should return hasError: true and empty prices when API fails', async () => {

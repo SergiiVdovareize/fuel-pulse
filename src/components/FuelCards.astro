@@ -5,10 +5,11 @@ import { FUEL_METAS } from '../types/fuel';
 interface Props {
   prices: FuelPrices;
   deltas?: FuelDeltas;
+  todayPrices?: FuelPrices;
   unit: string;
 }
 
-const { prices, deltas, unit } = Astro.props;
+const { prices, deltas, todayPrices, unit } = Astro.props;
 ---
 
 <div class="prices-grid">
@@ -21,6 +22,12 @@ const { prices, deltas, unit } = Astro.props;
       const isUp = hasDelta && delta! > 0;
       const isDown = hasDelta && delta! < 0;
 
+      const todayPrice = todayPrices ? todayPrices[fuel.key] : undefined;
+      const hasTodayComp = isAvailable && typeof todayPrice === 'number' && todayPrice > 0;
+      const diffWithToday = hasTodayComp ? Math.round((price - todayPrice!) * 100) / 100 : 0;
+      const absDiff = Math.abs(diffWithToday).toFixed(2);
+      const formattedDiff = diffWithToday > 0 ? `+${absDiff}` : diffWithToday < 0 ? `-${absDiff}` : `0.00`;
+
       return (
         <article class="price-card glass-card" style={`--fuel-accent: ${fuel.badgeColor};`}>
           <div class="card-header">
@@ -30,7 +37,7 @@ const { prices, deltas, unit } = Astro.props;
               </span>
               {hasDelta && (
                 <span class={`delta-badge ${isUp ? 'delta-up' : isDown ? 'delta-down' : 'delta-neutral'}`}>
-                  {isUp ? `+${delta?.toFixed(2)} 🔺` : isDown ? `${delta?.toFixed(2)} 🔻` : `0.00`}
+                  {isUp ? `+${delta?.toFixed(2)} ▲` : isDown ? `${delta?.toFixed(2)} ▼` : `0.00`}
                 </span>
               )}
             </div>
@@ -39,9 +46,11 @@ const { prices, deltas, unit } = Astro.props;
 
           <div class="card-body">
             {isAvailable ? (
-              <div class="price-wrapper">
-                <span class="price-number">{price.toFixed(2)}</span>
-                <span class="price-unit">{unit}</span>
+              <div class="price-section">
+                <div class="price-wrapper">
+                  <span class="price-number">{price.toFixed(2)}</span>
+                  <span class="price-unit">{unit}</span>
+                </div>
               </div>
             ) : (
               <div class="price-unavailable">
@@ -50,6 +59,14 @@ const { prices, deltas, unit } = Astro.props;
             )}
             <p class="fuel-desc">{fuel.description}</p>
           </div>
+
+          {isAvailable && hasTodayComp && (
+            <div class="card-footer-bar">
+              <div class="footer-content">
+                {formattedDiff} грн.  до сьогодні
+              </div>
+            </div>
+          )}
         </article>
       );
     })
@@ -59,13 +76,13 @@ const { prices, deltas, unit } = Astro.props;
 <style>
   .prices-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.25rem;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
     margin: 2rem 0;
   }
 
   .price-card {
-    padding: 1.5rem;
+    padding: 1.25rem 1rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -141,11 +158,14 @@ const { prices, deltas, unit } = Astro.props;
     color: var(--text-primary);
   }
 
+  .price-section {
+    margin-bottom: 0.75rem;
+  }
+
   .price-wrapper {
     display: flex;
     align-items: baseline;
     gap: 0.4rem;
-    margin-bottom: 0.75rem;
   }
 
   .price-number {
@@ -162,6 +182,19 @@ const { prices, deltas, unit } = Astro.props;
     font-weight: 500;
   }
 
+  .card-footer-bar {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .footer-content {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
   .price-unavailable {
     font-size: 1.1rem;
     color: var(--text-muted);
@@ -172,6 +205,12 @@ const { prices, deltas, unit } = Astro.props;
     font-size: 0.78rem;
     color: var(--text-secondary);
     line-height: 1.4;
+  }
+
+  @media (max-width: 1024px) {
+    .prices-grid {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
   }
 
   @media (max-width: 640px) {
