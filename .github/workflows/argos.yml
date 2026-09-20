@@ -47,3 +47,5 @@ jobs:
 
       - name: Lighthouse
         run: npm run test:lighthouse
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
