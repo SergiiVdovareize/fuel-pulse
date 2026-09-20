@@ -1,4 +1,4 @@
-name: Visual Regression (Argos CI)
+name: Quality Pipeline
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main, master]
 
 jobs:
-  visual-test:
+  quality-gate:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,25 +25,25 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Type Check
+        run: npm run check
+
+      - name: Prettier Check
+        run: npm run format:check
+
+      - name: Linter
+        run: npm run lint
+
+      - name: Unit Tests
+        run: npm test
+
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      - name: Run Astro Type Check
-        run: npm run check
-
-      - name: Run Prettier Check
-        run: npm run format:check
-
-      - name: Run Linter
-        run: npm run lint
-
-      - name: Run Unit Tests
-        run: npm test
-
-      - name: Run Playwright Visual Tests
+      - name: UI Tests
         run: npm run test:e2e
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
 
-      - name: Run Lighthouse CI Audit
+      - name: Lighthouse
         run: npm run test:lighthouse
